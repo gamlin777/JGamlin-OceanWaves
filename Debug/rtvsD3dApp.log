@@ -1,0 +1,28 @@
+﻿Build started 14/03/2013 20:49:34.
+     1>Project "C:\Users\James\Documents\Maths & GFX\Assignment 3 Waves\JGamlin Waves\rtvsD3dApp.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Touching ".\Debug\rtvsD3dApp.unsuccessfulbuild".
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _VC80_UPGRADE=0x0710 /D _MBCS /Gm- /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo".\Debug/" /Fd".\Debug/vc100.pdb" /FR".\Debug\\" /Gd /TP /analyze- /errorReport:prompt source\rtvsD3dApp.cpp
+         rtvsD3dApp.cpp
+       ResourceCompile:
+         All outputs are up-to-date.
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:".\Debug/rtvsD3dApp.exe" /NOLOGO d3dx9.lib d3d9.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:".\Debug\rtvsD3dApp.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:".\Debug/rtvsD3dApp.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\Debug\rtvsD3dApp.lib" /MACHINE:X86 .\Debug\rtvsD3dApp.res
+         .\Debug/rtvsD3dApp.obj
+         .\Debug/rtvsD3dWinLite.obj
+         .\Debug/vector.obj
+         LINK : .\Debug/rtvsD3dApp.exe not found or not built by the last incremental link; performing full link
+         rtvsD3dApp.vcxproj -> C:\Users\James\Documents\Maths & GFX\Assignment 3 Waves\JGamlin Waves\.\Debug\rtvsD3dApp.exe
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:".\Debug/rtvsD3dApp.exe;#1" /manifest .\Debug\rtvsD3dApp.exe.intermediate.manifest
+       BscMake:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\bscmake.exe /nologo /o".\Debug\rtvsD3dApp.bsc" .\Debug\rtvsD3dApp.sbr .\Debug\rtvsD3dWinLite.sbr .\Debug\vector.sbr
+       FinalizeBuildStatus:
+         Deleting file ".\Debug\rtvsD3dApp.unsuccessfulbuild".
+         Touching ".\Debug\rtvsD3dApp.lastbuildstate".
+     1>Done Building Project "C:\Users\James\Documents\Maths & GFX\Assignment 3 Waves\JGamlin Waves\rtvsD3dApp.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:04.54
