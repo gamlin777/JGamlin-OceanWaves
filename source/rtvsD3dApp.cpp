@@ -19,6 +19,7 @@
 // ---------- include ----------
 
 #include "../header/rtvsD3dApp.h"
+#include "../header/vector.h"
 
 
 
@@ -125,22 +126,80 @@ bool rtvsD3dApp::cleanupDX (LPDIRECT3DDEVICE9 pd3dDevice)
     }
 
 
-    // ---- invalidate the vertex buffer object ----
+   // ---- invalidate the texture object ----
 
-    if( pVertexBuffer != NULL )
+    if( pTexture != NULL )
     {
-        int nNewRefCount = pVertexBuffer->Release();
+        int nNewRefCount = pTexture->Release();
 
         if( nNewRefCount > 0 )
         {
             static char strError[256];
             sprintf_s ( strError, 256,
-				"The vertex buffer object failed to cleanup properly.\n"
+				"The texture object failed to cleanup properly.\n"
                 "Release() returned a reference count of %d",
 				nNewRefCount );
             MessageBox( NULL, strError, "ERROR", MB_OK | MB_ICONEXCLAMATION );
         }
-        pVertexBuffer = NULL;
+
+        pTexture = NULL;
+    }
+
+
+    // ---- invalidate the axis vertex buffer object ----
+
+    if( pAxisVertexBuffer != NULL )
+    {
+        int nNewRefCount = pAxisVertexBuffer->Release();
+
+        if( nNewRefCount > 0 )
+        {
+            static char strError[256];
+            sprintf_s ( strError, 256,
+				"The axis vertex buffer object failed to cleanup properly.\n"
+                "Release() returned a reference count of %d",
+				nNewRefCount );
+            MessageBox( NULL, strError, "ERROR", MB_OK | MB_ICONEXCLAMATION );
+        }
+        pAxisVertexBuffer = NULL;
+    }
+
+	
+	// ---- invalidate the quad vertex buffer object ----
+
+    if( pQuadVertexBuffer != NULL )
+    {
+        int nNewRefCount = pQuadVertexBuffer->Release();
+
+        if( nNewRefCount > 0 )
+        {
+            static char strError[256];
+            sprintf_s ( strError, 256,
+				"The quad vertex buffer object failed to cleanup properly.\n"
+                "Release() returned a reference count of %d",
+				nNewRefCount );
+            MessageBox( NULL, strError, "ERROR", MB_OK | MB_ICONEXCLAMATION );
+        }
+        pQuadVertexBuffer = NULL;
+    }
+
+
+    // ---- invalidate the vector vertex buffer object ----
+
+    if( pVectVertexBuffer != NULL )
+    {
+        int nNewRefCount = pVectVertexBuffer->Release();
+
+        if( nNewRefCount > 0 )
+        {
+            static char strError[256];
+            sprintf_s ( strError, 256,
+				"The line vertex buffer object failed to cleanup properly.\n"
+                "Release() returned a reference count of %d",
+				nNewRefCount );
+            MessageBox( NULL, strError, "ERROR", MB_OK | MB_ICONEXCLAMATION );
+        }
+        pVectVertexBuffer = NULL;
     }
 
 
@@ -172,7 +231,7 @@ bool rtvsD3dApp::display (LPDIRECT3DDEVICE9 pd3dDevice)
     pd3dDevice->Clear( 0,
 		NULL,
 		D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER,
-		D3DCOLOR_COLORVALUE(0.35f,0.53f,0.7f,1.0f),
+		D3DCOLOR_COLORVALUE(0.0f,0.3f,0.7f,1.0f),
 		1.0f,
 		0);
 
@@ -182,9 +241,12 @@ bool rtvsD3dApp::display (LPDIRECT3DDEVICE9 pd3dDevice)
     D3DXMATRIX matTranslation;
     D3DXMATRIX matWorld;
 
-
-	// display flag
-	bool lines = true;
+	// display flags
+	bool axis = true;
+	bool quad = true;
+	bool vectors = true;
+	bool quadWire = true;
+	bool quadSolid = true;
 
 
 	// view matrix
@@ -201,54 +263,118 @@ bool rtvsD3dApp::display (LPDIRECT3DDEVICE9 pd3dDevice)
 
 
 	// locate
-	D3DXMatrixTranslation( &matTranslation, 0, 0, 20 );
+	D3DXMatrixTranslation( &matTranslation, 0, -2, 15 );
 	matWorld = matRotation * matTranslation;
 	pd3dDevice->SetTransform( D3DTS_WORLD, &matWorld );
 
 
-	// IF lines THEN
-	if (lines)
+	// IF axis THEN
+	if (axis)
 	{
-
-		// set draw parameters
-		pd3dDevice->SetTexture( 0, 0 );
-		pd3dDevice->SetStreamSource( 0, pVertexBuffer, 0, sizeof(Vertex) );
-		pd3dDevice->SetFVF( Vertex::FVF_Flags );
-		pd3dDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
 		pd3dDevice->SetMaterial( &lineMtrl );
-
-		// update key clicked
-		updateKeyboard();
-
-		// select angle of increment from a look up table
-		// where the array index == current key clicked
-		float angle[8] = { 60, 30, 20, 15, 10, 5, 2, 1 };
-		int angIncr = (int)angle[currentKeyClicked];
-
-		// draw a line rotating around the z axis
-		Vertex s, e;
-		float rdn = 3.141592f / 180.0f;
-		for (int a=0; a<360; a+=angIncr)
-		{
-			// update start and end vertex
-			float ang = float(a)*rdn;
-			float cosAng = cos(ang);
-			float sinAng = sin(ang);
-			s.z = 0;
-			s.x = 2  * cosAng;
-			s.y = 2  * sinAng;
-			e.z = 0;
-			e.x = 8 * cosAng;
-			e.y = 8 * sinAng;
-
-			// update vertex buffer
-			updateVertexBuffer(s, e);
-
-			// draw a single line
-			pd3dDevice->DrawPrimitive( D3DPT_LINELIST, 0, 1 );
-		}
+		pd3dDevice->SetTexture( 0, 0 );
+		pd3dDevice->SetStreamSource( 0, pAxisVertexBuffer, 0, sizeof(LineVertex) );
+		pd3dDevice->SetFVF( LineVertex::FVF_Flags );
+		pd3dDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
+		pd3dDevice->DrawPrimitive( D3DPT_LINELIST, 0, numAxisLines );
 	}
 
+
+	// IF quad THEN
+	if (quad)
+	{
+
+		// display solid textured quad
+		if (quadSolid)
+		{
+			pd3dDevice->SetMaterial( &quadMtrl );
+			pd3dDevice->SetTexture( 0, pTexture );
+			pd3dDevice->SetStreamSource( 0, pQuadVertexBuffer, 0, sizeof(QuadVertex) );
+			pd3dDevice->SetFVF( QuadVertex::FVF_Flags );
+			pd3dDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
+			pd3dDevice->DrawPrimitive( D3DPT_TRIANGLESTRIP, 0, numQuadTriangles );
+		}
+
+		// display wireframe quad
+		if (quadWire)
+		{
+			pd3dDevice->SetMaterial( &lineMtrl );
+			pd3dDevice->SetTexture( 0, 0 );
+			pd3dDevice->SetStreamSource( 0, pQuadVertexBuffer, 0, sizeof(QuadVertex) );
+			pd3dDevice->SetFVF( QuadVertex::FVF_Flags );
+			pd3dDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
+			pd3dDevice->DrawPrimitive( D3DPT_TRIANGLESTRIP, 0, numQuadTriangles );
+		}
+
+	}
+
+
+	// IF vectors THEN
+	if (vectors)
+	{
+
+		// update current key clicked (if any)
+		updateKeyboard ();
+
+		// update??
+		if (currentKeyClicked != previousKeyClicked)
+		{
+			// calculate
+			switch (currentKeyClicked)
+			{
+				case 1:
+					vectorLineCount = vectorAdd();
+					vectorName = "Add";
+					break;
+				case 2:
+					vectorLineCount = vectorSubtract();
+					vectorName = "Subtract";
+					break;
+				case 3:
+					vectorLineCount = vectorMultiply();
+					vectorName = "Multiply";
+					break;
+				case 4:
+					vectorLineCount = vectorDivide();
+					vectorName = "Divide";
+					break;
+				case 5:
+					vectorLineCount = vectorNegate();
+					vectorName = "Negate";
+					break;
+				case 6:
+					vectorLineCount = vectorNormalise();
+					vectorName = "Normalise";
+					break;
+				case 7:
+					vectorLineCount = vectorCross();
+					vectorName = "Cross Product";
+					break;
+				case 8:
+					vectorLineCount = vectorDot();
+					vectorName = "Dot Product";
+					break;
+				default:
+					break;
+			}
+			previousKeyClicked = currentKeyClicked;
+		}
+
+		// draw
+		if (vectorLineCount > 0 || vectorLineCount < 4)
+		{
+			RECT rect = { 40, 40, 900, 100 };
+			pFont->DrawText(0,vectorName,-1,&rect,0,fontCol);
+			pd3dDevice->SetTexture( 0, 0 );
+			pd3dDevice->SetStreamSource( 0, pVectVertexBuffer, 0, sizeof(LineVertex) );
+			pd3dDevice->SetFVF( LineVertex::FVF_Flags );
+			pd3dDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
+			pd3dDevice->SetMaterial( &vectorStartMtrl );
+			pd3dDevice->DrawPrimitive( D3DPT_LINELIST, 0, vectorLineCount-1 );
+			pd3dDevice->SetMaterial( &vectorResultMtrl );
+			pd3dDevice->DrawPrimitive( D3DPT_LINELIST, (vectorLineCount-1)*2, 1 );
+		}
+	}
 
 
 	// ok
@@ -275,9 +401,37 @@ bool rtvsD3dApp::setup ()
 
     // setup a material for the lines
     ZeroMemory( &lineMtrl, sizeof(D3DMATERIAL9) );
-	lineMtrl.Emissive.r = 1.0f;
-	lineMtrl.Emissive.g = 1.0f;
+	lineMtrl.Emissive.r = 0.5f;
+	lineMtrl.Emissive.g = 0.5f;
 	lineMtrl.Emissive.b = 1.0f;
+
+	// setup a material for the start vectors
+    ZeroMemory( &vectorStartMtrl, sizeof(D3DMATERIAL9) );
+	vectorStartMtrl.Emissive.r = 0.3f;
+	vectorStartMtrl.Emissive.g = 1.0f;
+	vectorStartMtrl.Emissive.b = 0.3f;
+
+	// setup a material for the result vectors
+    ZeroMemory( &vectorResultMtrl, sizeof(D3DMATERIAL9) );
+	vectorResultMtrl.Emissive.r = 1.0f;
+	vectorResultMtrl.Emissive.g = 0.3f;
+	vectorResultMtrl.Emissive.b = 0.3f;
+
+	// setup a material for the textured quad
+    ZeroMemory( &quadMtrl, sizeof(D3DMATERIAL9) );
+	quadMtrl.Ambient.r = 1.0f;
+	quadMtrl.Ambient.g = 1.0f;
+	quadMtrl.Ambient.b = 1.0f;
+	quadMtrl.Ambient.a = 1.0f;
+    quadMtrl.Diffuse.r = 1.0f;
+    quadMtrl.Diffuse.g = 1.0f;
+    quadMtrl.Diffuse.b = 1.0f;
+    quadMtrl.Diffuse.a = 1.0f;
+    quadMtrl.Specular.r = 1.0f;
+    quadMtrl.Specular.g = 1.0f;
+    quadMtrl.Specular.b = 1.0f;
+    quadMtrl.Specular.a = 1.0f;
+    quadMtrl.Power = 40.0f;
 
     // setup directional sun light
 	ZeroMemory( &sunLight, sizeof(D3DLIGHT9) );
@@ -347,6 +501,14 @@ bool rtvsD3dApp::setupDX (LPDIRECT3DDEVICE9 pd3dDevice)
     pd3dDevice->LightEnable( 1, TRUE );
 
 
+    // ---- create a texture object ----
+    D3DXCreateTextureFromFile( pd3dDevice, "image/baboon.jpg", &pTexture );
+
+ 	// ---- set texture sampling states ----
+	pd3dDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
+    pd3dDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
+
+
 	// ---- FONT ----
 
 	fontCol = D3DCOLOR_COLORVALUE(1,1,1,1);
@@ -365,32 +527,126 @@ bool rtvsD3dApp::setupDX (LPDIRECT3DDEVICE9 pd3dDevice)
 		&pFont);
 
 
-	// ---- LINE ----
+	// ---- AXIS ----
 
 
-	// ---- initialise vertex data ----
- 	Vertex vertices[] =
+	// ---- initialise axis vertex data ----
+ 	LineVertex axisVertices[] =
 	{
 		//    x      y      z
 		{  0.0f,  0.0f,  0.0f  },
+		{  1.0f,  0.0f,  0.0f  },
+		{  0.9f,  0.0f,  0.1f  },
+		{  1.0f,  0.0f,  0.0f  },
+		{  0.9f,  0.0f, -0.1f  },
+		{  1.0f,  0.0f,  0.0f  },
+
 		{  0.0f,  0.0f,  0.0f  },
+		{  0.0f,  1.0f,  0.0f  },
+		{ -0.1f,  0.9f,  0.0f  },
+		{  0.0f,  1.0f,  0.0f  },
+		{  0.1f,  0.9f,  0.0f  },
+		{  0.0f,  1.0f,  0.0f  },
+
+		{  0.0f,  0.0f,  0.0f  },
+		{  0.0f,  0.0f,  1.0f  },
+		{ -0.1f,  0.0f,  0.9f  },
+		{  0.0f,  0.0f,  1.0f  },
+		{  0.1f,  0.0f,  0.9f  },
+		{  0.0f,  0.0f,  1.0f  },
 	};
 
-	// ---- create vertex buffer ----
-	int numVertices = sizeof(vertices) / ( sizeof(float) * 3 );
-	int numLines = numVertices / 2;
-	pd3dDevice->CreateVertexBuffer( numVertices*sizeof(Vertex),
+	// ---- create axis vertex buffer ----
+	int numAxisVertices = sizeof(axisVertices) / ( sizeof(float) * 3 );
+	numAxisLines = numAxisVertices / 2;
+	pd3dDevice->CreateVertexBuffer( numAxisVertices*sizeof(LineVertex),
                                       D3DUSAGE_WRITEONLY,
-                                      Vertex::FVF_Flags,
+                                      LineVertex::FVF_Flags,
                                       //D3DPOOL_MANAGED, // does not have to be properly Released before calling IDirect3DDevice9::Reset
                                       D3DPOOL_DEFAULT,   // must be Released properly before calling IDirect3DDevice9::Reset
-                                      &pVertexBuffer, NULL );
+                                      &pAxisVertexBuffer, NULL );
+
+
+	// ---- scale and add offset to axis ----
+	float aScale  = 5;
+	float yOffset = 0.02f;
+ 	LineVertex *pAxisVertices = axisVertices;
+	for (int av=0; av<numAxisVertices; av++)
+	{
+		pAxisVertices->x *= aScale;
+		pAxisVertices->y  = pAxisVertices->y * aScale + yOffset;
+		pAxisVertices->z *= aScale;
+		pAxisVertices++;
+	}
+
+	// ---- block copy into axis vertex buffer ----
+	void *pVertices = NULL;
+	pAxisVertexBuffer->Lock( 0, sizeof(axisVertices), (void**)&pVertices, 0 );
+	memcpy( pVertices, axisVertices, sizeof(axisVertices) );
+	pAxisVertexBuffer->Unlock();
+
+
+	// ---- QUAD ----
+
+
+    // ---- initialise quad vertex data ----
+ 	QuadVertex quadVertices[] =
+	{
+		//    x      y      z     nx     ny     nz     d,   tu     tv
+		{  5.0f,  0.0f,  5.0f,  0.0f,  1.0f,  0.0f,    0,  0.0f,  0.0f },
+		{ -5.0f,  0.0f,  5.0f,  0.0f,  1.0f,  0.0f,    0,  1.0f,  0.0f },
+		{  5.0f,  0.0f, -5.0f,  0.0f,  1.0f,  0.0f,    0,  0.0f,  1.0f },
+		{ -5.0f,  0.0f, -5.0f,  0.0f,  1.0f,  0.0f,    0,  1.0f,  1.0f }
+	};
+
+	// ---- create quad vertex buffer ----
+	int numQuadVertices = sizeof(quadVertices) / ( sizeof(float) * 8 +  sizeof(DWORD));
+	numQuadTriangles = numQuadVertices / 2;
+	pd3dDevice->CreateVertexBuffer( numQuadVertices*sizeof(QuadVertex),
+                                      D3DUSAGE_WRITEONLY,
+                                      QuadVertex::FVF_Flags,
+                                      //D3DPOOL_MANAGED, // does not have to be properly Released before calling IDirect3DDevice9::Reset
+                                      D3DPOOL_DEFAULT,   // must be Released properly before calling IDirect3DDevice9::Reset
+                                      &pQuadVertexBuffer, NULL );
+
+
+	// ---- block copy into quad vertex buffer ----
+	pVertices = NULL;
+	pQuadVertexBuffer->Lock( 0, sizeof(quadVertices), (void**)&pVertices, 0 );
+	memcpy( pVertices, quadVertices, sizeof(quadVertices) );
+	pQuadVertexBuffer->Unlock();
+
+
+	// ---- VECTORS ----
+
+
+	// ---- initialise vector vertex data ----
+ 	LineVertex vectVertices[] =
+	{
+		//    x      y      z
+		{  0.0f,  0.0f,  0.0f  },
+		{  1.0f,  0.0f,  0.0f  },
+		{  0.0f,  0.0f,  0.0f  },
+		{  1.0f,  0.0f,  0.0f  },
+		{  0.0f,  0.0f,  0.0f  },
+		{  1.0f,  0.0f,  0.0f  }
+	};
+
+	// ---- create vector vertex buffer ----
+	int numVectVertices = sizeof(vectVertices) / ( sizeof(float) * 3 );
+	numVectLines = numVectVertices / 2;
+	pd3dDevice->CreateVertexBuffer( numVectVertices*sizeof(LineVertex),
+                                      D3DUSAGE_WRITEONLY,
+                                      LineVertex::FVF_Flags,
+                                      //D3DPOOL_MANAGED, // does not have to be properly Released before calling IDirect3DDevice9::Reset
+                                      D3DPOOL_DEFAULT,   // must be Released properly before calling IDirect3DDevice9::Reset
+                                      &pVectVertexBuffer, NULL );
 
 	// ---- block copy into vector vertex buffer ----
-	void* pVertices = NULL;
-	pVertexBuffer->Lock( 0, sizeof(vertices), (void**)&pVertices, 0 );
-	memcpy( pVertices, vertices, sizeof(vertices) );
-	pVertexBuffer->Unlock();
+	pVertices = NULL;
+	pVectVertexBuffer->Lock( 0, sizeof(vectVertices), (void**)&pVertices, 0 );
+	memcpy( pVertices, vectVertices, sizeof(vectVertices) );
+	pVectVertexBuffer->Unlock();
 
 
 	// ok
@@ -406,25 +662,131 @@ bool rtvsD3dApp::setupDX (LPDIRECT3DDEVICE9 pd3dDevice)
 
 
 
-// ---------- update vertex buffer ----------
+// ---- vector demos ----
 
-/*!
+#define VLEN 4
 
-\brief line - update vertex buffer
-\author Gareth Edwards
-
-\param 
-
-\return bool (TRUE)
-
-*/
-
-DWORD rtvsD3dApp::updateVertexBuffer(Vertex s, Vertex e)
+DWORD rtvsD3dApp::vectorAdd()
 {
+	Vector3D o( 0, 0, 0);
+	Vector3D a( VLEN, VLEN, VLEN);
+	Vector3D b( VLEN, VLEN,-VLEN);
+	Vector3D c = a + b;
+	vectorLine(0, o, a);
+	vectorLine(1, o, b);
+	vectorLine(2, o, c);
+	return 3;
+}
+
+
+DWORD rtvsD3dApp::vectorSubtract()
+{
+	Vector3D o( 0, 0, 0);
+	Vector3D a( VLEN, VLEN, VLEN);
+	Vector3D b( VLEN, VLEN,-VLEN);
+	Vector3D c = a - b;
+	vectorLine(0, o, a);
+	vectorLine(1, o, b);
+	vectorLine(2, o, c);
+	return 3;
+}
+
+
+DWORD rtvsD3dApp::vectorMultiply()
+{
+	Vector3D o( 0, 0, 0);
+	Vector3D a( VLEN, VLEN, 0);
+	Vector3D b = a * 2;
+	vectorLine(0, o, b);
+	vectorLine(1, o, a);
+	return 2;
+}
+
+
+DWORD rtvsD3dApp::vectorDivide()
+{
+	Vector3D o( 0, 0, 0);
+	Vector3D a( VLEN, VLEN, 0);
+	Vector3D b = a / 2;
+	vectorLine(0, o, a);
+	vectorLine(1, o, b);
+	return 2;
+}
+
+
+DWORD rtvsD3dApp::vectorNegate()
+{
+	Vector3D o( 0, 0, 0);
+	Vector3D a( VLEN, VLEN, 0);
+	Vector3D b( VLEN, VLEN, 0);
+	b.negate();
+	vectorLine(0, o, a);
+	vectorLine(1, o, b);
+	return 2;
+}
+
+
+DWORD rtvsD3dApp::vectorNormalise()
+{
+	Vector3D o( 0, 0, 0);
+	Vector3D a( VLEN, VLEN, 0);
+	Vector3D b( VLEN, VLEN, 0);
+	b.normalize();
+	vectorLine(0, o, a);
+	vectorLine(1, o, b);
+	return 2;
+}
+
+
+DWORD rtvsD3dApp::vectorCross()
+{
+	Vector3D o( 0, 0,-0);
+	Vector3D a( VLEN, VLEN, VLEN);
+	Vector3D b( VLEN, VLEN,-VLEN);
+	Vector3D c( VLEN, VLEN,-VLEN);
+	c.crossProduct(a);
+	vectorLine(0, o, a);
+	vectorLine(1, o, b);
+	vectorLine(2, o, c);
+	return 3;
+}
+
+
+DWORD rtvsD3dApp::vectorDot()
+{
+	Vector3D o( 0, 0,-0);
+	Vector3D a( VLEN, VLEN, VLEN);
+	Vector3D b( VLEN, VLEN,-VLEN);
+	Vector3D c;
+
+	double d = b.dotProduct(a);
+
+	c.x = (a.x + b.x) / 2;
+	c.y = (a.y + b.y) / 2;
+	c.z = (a.z + b.z) / 2;
+
+	double l =c.length();
+	c.x *= d/l;
+	c.y *= d/l;
+	c.z *= d/l;
+
+	vectorLine(0, o, a);
+	vectorLine(1, o, b);
+	vectorLine(2, o, c);
+	return 3;
+}
+
+
+DWORD rtvsD3dApp::vectorLine(int lineIndex, Vector3D s, Vector3D e)
+{
+	// catch illegal line index
+	if (lineIndex < 0 || lineIndex > 2)
+		return 0;
 
 	// ---- update vector vertex buffer ----
-	Vertex *pVertices = NULL;
-	pVertexBuffer->Lock( 0, sizeof(Vertex) * 6, (void**)&pVertices, 0 );
+	LineVertex *pVertices = NULL;
+	pVectVertexBuffer->Lock( 0, sizeof(LineVertex) * 6, (void**)&pVertices, 0 );
+	pVertices += lineIndex*2;
 	pVertices->x = (float)s.x;
 	pVertices->y = (float)s.y;
 	pVertices->z = (float)s.z;
@@ -432,7 +794,7 @@ DWORD rtvsD3dApp::updateVertexBuffer(Vertex s, Vertex e)
 	pVertices->x = (float)e.x;
 	pVertices->y = (float)e.y;
 	pVertices->z = (float)e.z;
-	pVertexBuffer->Unlock();
+	pVectVertexBuffer->Unlock();
 
 	// ok
 	return 1;

@@ -215,6 +215,10 @@
 				RelativePath=".\source\rtvsD3dWinLite.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\source\vector.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="resource"
