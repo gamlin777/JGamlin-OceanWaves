@@ -41,18 +41,6 @@
 
 
 // ---------- FVF - Flexible Vertex Formats ----------
-
-struct LineVertex
-{
-    float x , y, z;
- 
-    enum FVF
-    {
-        FVF_Flags = D3DFVF_XYZ
-    };
-};
-
-
 struct QuadVertex
 {
     float x , y, z;
@@ -63,6 +51,19 @@ struct QuadVertex
     enum FVF
     {
         FVF_Flags = D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_DIFFUSE | D3DFVF_TEX1
+    };
+};
+
+
+struct meshVertex
+{
+    float x, y, z;
+    float nx, ny, nz;
+    float tu, tv;
+
+    enum FVF
+    {
+        FVF_Flags = D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX1
     };
 };
 
@@ -87,25 +88,37 @@ public:
 
 	ID3DXFont*				pFont;
 	D3DCOLOR				fontCol;
-	LPDIRECT3DVERTEXBUFFER9	pAxisVertexBuffer;
-	LPDIRECT3DVERTEXBUFFER9	pQuadVertexBuffer;
-	LPDIRECT3DVERTEXBUFFER9	pVectVertexBuffer;
-	DWORD					numAxisLines;
-	DWORD					numQuadTriangles;
-	DWORD					numVectLines;
-	LPDIRECT3DTEXTURE9		pTexture;
-	D3DMATERIAL9			lineMtrl;
-	D3DMATERIAL9			vectorStartMtrl;
-	D3DMATERIAL9			vectorResultMtrl;
+
+	LPDIRECT3DVERTEXBUFFER9	pVertexBuffer;
+	LPDIRECT3DTEXTURE9		waveTexture;
 	D3DMATERIAL9			quadMtrl;
+	D3DLIGHT9				surfaceLight;
+	float					fSpinX;
+	float					fSpinY;
+	double					tSpin;
+	int						tCount;
 	D3DLIGHT9				sunLight;
 	D3DLIGHT9				backLight;
 	DWORD					currentKeyClicked;
 	DWORD					previousKeyClicked;
 	DWORD					vectorLineCount;
-	float					fSpinX;
-	float					fSpinY;
 	char*					vectorName;
+
+	// mesh
+
+	DWORD               vertexFormat;	//!< FVF - flexible vertex format
+	DWORD               vertexSize;		//!< size of vertex format (e.g. sizeof(vertex3x))
+	DWORD               vertices;		//!< number of vertices
+	DWORD               faces;			//!< number of faces
+	DWORD               vtxCols;		//!< number of vertex columns
+	DWORD               vtxRows;		//!< number of vertex rows
+	DWORD               celCols;		//!< number of cell rows
+	DWORD               celRows;		//!< number of cell rows
+	LPD3DXMESH          pMesh;			//!< the d3d object
+	float				meshParams[8];
+	int					meshVertsWidth;
+	int					meshVertsDepth;
+
 
 	// ---- methods ----
 
@@ -137,6 +150,12 @@ public:
 	// other
 	void getSpin	(float*, float*);
 	void setSpin	(float, float);
+
+	bool plane (LPDIRECT3DDEVICE9, int,	int, float*);   // mesh parameters
+	bool meshUpdateY (float*, float);
+
+	float sineWaveParameters[7];
+	float frame;
 
 };
 

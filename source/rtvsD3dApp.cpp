@@ -128,80 +128,7 @@ bool rtvsD3dApp::cleanupDX (LPDIRECT3DDEVICE9 pd3dDevice)
 
    // ---- invalidate the texture object ----
 
-    if( pTexture != NULL )
-    {
-        int nNewRefCount = pTexture->Release();
-
-        if( nNewRefCount > 0 )
-        {
-            static char strError[256];
-            sprintf_s ( strError, 256,
-				"The texture object failed to cleanup properly.\n"
-                "Release() returned a reference count of %d",
-				nNewRefCount );
-            MessageBox( NULL, strError, "ERROR", MB_OK | MB_ICONEXCLAMATION );
-        }
-
-        pTexture = NULL;
-    }
-
-
-    // ---- invalidate the axis vertex buffer object ----
-
-    if( pAxisVertexBuffer != NULL )
-    {
-        int nNewRefCount = pAxisVertexBuffer->Release();
-
-        if( nNewRefCount > 0 )
-        {
-            static char strError[256];
-            sprintf_s ( strError, 256,
-				"The axis vertex buffer object failed to cleanup properly.\n"
-                "Release() returned a reference count of %d",
-				nNewRefCount );
-            MessageBox( NULL, strError, "ERROR", MB_OK | MB_ICONEXCLAMATION );
-        }
-        pAxisVertexBuffer = NULL;
-    }
-
-	
-	// ---- invalidate the quad vertex buffer object ----
-
-    if( pQuadVertexBuffer != NULL )
-    {
-        int nNewRefCount = pQuadVertexBuffer->Release();
-
-        if( nNewRefCount > 0 )
-        {
-            static char strError[256];
-            sprintf_s ( strError, 256,
-				"The quad vertex buffer object failed to cleanup properly.\n"
-                "Release() returned a reference count of %d",
-				nNewRefCount );
-            MessageBox( NULL, strError, "ERROR", MB_OK | MB_ICONEXCLAMATION );
-        }
-        pQuadVertexBuffer = NULL;
-    }
-
-
-    // ---- invalidate the vector vertex buffer object ----
-
-    if( pVectVertexBuffer != NULL )
-    {
-        int nNewRefCount = pVectVertexBuffer->Release();
-
-        if( nNewRefCount > 0 )
-        {
-            static char strError[256];
-            sprintf_s ( strError, 256,
-				"The line vertex buffer object failed to cleanup properly.\n"
-                "Release() returned a reference count of %d",
-				nNewRefCount );
-            MessageBox( NULL, strError, "ERROR", MB_OK | MB_ICONEXCLAMATION );
-        }
-        pVectVertexBuffer = NULL;
-    }
-
+    
 
 	// ok
 	return true;
@@ -261,122 +188,17 @@ bool rtvsD3dApp::display (LPDIRECT3DDEVICE9 pd3dDevice)
 	// set render states
 	pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 
-
+	
 	// locate
-	D3DXMatrixTranslation( &matTranslation, 0, -2, 15 );
+	D3DXMatrixTranslation( &matTranslation, 0, -4, 50 );
 	matWorld = matRotation * matTranslation;
 	pd3dDevice->SetTransform( D3DTS_WORLD, &matWorld );
 
+	pd3dDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
+	frame++;
+	meshUpdateY(sineWaveParameters, frame);							//frame increments thus the function does
 
-	// IF axis THEN
-	if (axis)
-	{
-		pd3dDevice->SetMaterial( &lineMtrl );
-		pd3dDevice->SetTexture( 0, 0 );
-		pd3dDevice->SetStreamSource( 0, pAxisVertexBuffer, 0, sizeof(LineVertex) );
-		pd3dDevice->SetFVF( LineVertex::FVF_Flags );
-		pd3dDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
-		pd3dDevice->DrawPrimitive( D3DPT_LINELIST, 0, numAxisLines );
-	}
-
-
-	// IF quad THEN
-	if (quad)
-	{
-
-		// display solid textured quad
-		if (quadSolid)
-		{
-			pd3dDevice->SetMaterial( &quadMtrl );
-			pd3dDevice->SetTexture( 0, pTexture );
-			pd3dDevice->SetStreamSource( 0, pQuadVertexBuffer, 0, sizeof(QuadVertex) );
-			pd3dDevice->SetFVF( QuadVertex::FVF_Flags );
-			pd3dDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
-			pd3dDevice->DrawPrimitive( D3DPT_TRIANGLESTRIP, 0, numQuadTriangles );
-		}
-
-		// display wireframe quad
-		if (quadWire)
-		{
-			pd3dDevice->SetMaterial( &lineMtrl );
-			pd3dDevice->SetTexture( 0, 0 );
-			pd3dDevice->SetStreamSource( 0, pQuadVertexBuffer, 0, sizeof(QuadVertex) );
-			pd3dDevice->SetFVF( QuadVertex::FVF_Flags );
-			pd3dDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
-			pd3dDevice->DrawPrimitive( D3DPT_TRIANGLESTRIP, 0, numQuadTriangles );
-		}
-
-	}
-
-
-	// IF vectors THEN
-	if (vectors)
-	{
-
-		// update current key clicked (if any)
-		updateKeyboard ();
-
-		// update??
-		if (currentKeyClicked != previousKeyClicked)
-		{
-			// calculate
-			switch (currentKeyClicked)
-			{
-				case 1:
-					vectorLineCount = vectorAdd();
-					vectorName = "Add";
-					break;
-				case 2:
-					vectorLineCount = vectorSubtract();
-					vectorName = "Subtract";
-					break;
-				case 3:
-					vectorLineCount = vectorMultiply();
-					vectorName = "Multiply";
-					break;
-				case 4:
-					vectorLineCount = vectorDivide();
-					vectorName = "Divide";
-					break;
-				case 5:
-					vectorLineCount = vectorNegate();
-					vectorName = "Negate";
-					break;
-				case 6:
-					vectorLineCount = vectorNormalise();
-					vectorName = "Normalise";
-					break;
-				case 7:
-					vectorLineCount = vectorCross();
-					vectorName = "Cross Product";
-					break;
-				case 8:
-					vectorLineCount = vectorDot();
-					vectorName = "Dot Product";
-					break;
-				default:
-					break;
-			}
-			previousKeyClicked = currentKeyClicked;
-		}
-
-		// draw
-		if (vectorLineCount > 0 || vectorLineCount < 4)
-		{
-			RECT rect = { 40, 40, 900, 100 };
-			pFont->DrawText(0,vectorName,-1,&rect,0,fontCol);
-			pd3dDevice->SetTexture( 0, 0 );
-			pd3dDevice->SetStreamSource( 0, pVectVertexBuffer, 0, sizeof(LineVertex) );
-			pd3dDevice->SetFVF( LineVertex::FVF_Flags );
-			pd3dDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
-			pd3dDevice->SetMaterial( &vectorStartMtrl );
-			pd3dDevice->DrawPrimitive( D3DPT_LINELIST, 0, vectorLineCount-1 );
-			pd3dDevice->SetMaterial( &vectorResultMtrl );
-			pd3dDevice->DrawPrimitive( D3DPT_LINELIST, (vectorLineCount-1)*2, 1 );
-		}
-	}
-
-
+	pMesh->DrawSubset(0);
 	// ok
 	return true;
 
@@ -399,23 +221,7 @@ bool rtvsD3dApp::display (LPDIRECT3DDEVICE9 pd3dDevice)
 bool rtvsD3dApp::setup ()
 {
 
-    // setup a material for the lines
-    ZeroMemory( &lineMtrl, sizeof(D3DMATERIAL9) );
-	lineMtrl.Emissive.r = 0.5f;
-	lineMtrl.Emissive.g = 0.5f;
-	lineMtrl.Emissive.b = 1.0f;
-
-	// setup a material for the start vectors
-    ZeroMemory( &vectorStartMtrl, sizeof(D3DMATERIAL9) );
-	vectorStartMtrl.Emissive.r = 0.3f;
-	vectorStartMtrl.Emissive.g = 1.0f;
-	vectorStartMtrl.Emissive.b = 0.3f;
-
-	// setup a material for the result vectors
-    ZeroMemory( &vectorResultMtrl, sizeof(D3DMATERIAL9) );
-	vectorResultMtrl.Emissive.r = 1.0f;
-	vectorResultMtrl.Emissive.g = 0.3f;
-	vectorResultMtrl.Emissive.b = 0.3f;
+   
 
 	// setup a material for the textured quad
     ZeroMemory( &quadMtrl, sizeof(D3DMATERIAL9) );
@@ -459,6 +265,16 @@ bool rtvsD3dApp::setup ()
     backLight.Specular.b = 0.3f;
     backLight.Specular.a = 1.0f;
 
+	sineWaveParameters[0] = 0;
+	sineWaveParameters[1] = 0;
+	sineWaveParameters[2] = 1;
+	sineWaveParameters[3] = 90;
+	sineWaveParameters[4] = 0.5;
+	sineWaveParameters[5] = 0.5;
+	sineWaveParameters[6] = 0;
+	frame = 0;
+
+
 	// ok
 	return true;
 
@@ -483,38 +299,11 @@ bool rtvsD3dApp::setup ()
 bool rtvsD3dApp::setupDX (LPDIRECT3DDEVICE9 pd3dDevice)
 {
 
-	// ---- turn lighting ON ----
-	pd3dDevice->SetRenderState( D3DRS_LIGHTING , TRUE);
-
-
-	// ---- ambient light ----
-	pd3dDevice->SetRenderState( D3DRS_AMBIENT,D3DCOLOR_COLORVALUE( 0.3, 0.3, 0.3, 1.0));
-
-
-	// ---- sun light ----
-    pd3dDevice->SetLight( 0, &sunLight );
-    pd3dDevice->LightEnable( 0, TRUE );
-
-
-	// ---- back light ----
-	pd3dDevice->SetLight( 1, &backLight );
-    pd3dDevice->LightEnable( 1, TRUE );
-
-
-    // ---- create a texture object ----
-    D3DXCreateTextureFromFile( pd3dDevice, "image/baboon.jpg", &pTexture );
-
- 	// ---- set texture sampling states ----
-	pd3dDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
-    pd3dDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
-
-
-	// ---- FONT ----
-
-	fontCol = D3DCOLOR_COLORVALUE(1,1,1,1);
+	// ---- Setup the font ----
+	fontCol = D3DCOLOR_COLORVALUE(1.0f, 1.0f, 1.0f, 1.0f);
 	D3DXCreateFont(
 		pd3dDevice,
-		30,								// height in pixels
+		17,								// height in pixels
 		0,								// width in pixels (0 for default)
 		400,							// thickness, 0-1000 OR FW_THIN (100), FW_NORMAL (400), FW_BOLD (700), FW_HEAVY (900)
 		0,								// number of MipMaps to create. 0 creates a full chain - no scaling use 1
@@ -526,280 +315,321 @@ bool rtvsD3dApp::setupDX (LPDIRECT3DDEVICE9 pd3dDevice)
 		"Arial",						// name of the required font or "" for system best match
 		&pFont);
 
+	// ---- turn lighting ON ----
 
-	// ---- AXIS ----
-
-
-	// ---- initialise axis vertex data ----
- 	LineVertex axisVertices[] =
-	{
-		//    x      y      z
-		{  0.0f,  0.0f,  0.0f  },
-		{  1.0f,  0.0f,  0.0f  },
-		{  0.9f,  0.0f,  0.1f  },
-		{  1.0f,  0.0f,  0.0f  },
-		{  0.9f,  0.0f, -0.1f  },
-		{  1.0f,  0.0f,  0.0f  },
-
-		{  0.0f,  0.0f,  0.0f  },
-		{  0.0f,  1.0f,  0.0f  },
-		{ -0.1f,  0.9f,  0.0f  },
-		{  0.0f,  1.0f,  0.0f  },
-		{  0.1f,  0.9f,  0.0f  },
-		{  0.0f,  1.0f,  0.0f  },
-
-		{  0.0f,  0.0f,  0.0f  },
-		{  0.0f,  0.0f,  1.0f  },
-		{ -0.1f,  0.0f,  0.9f  },
-		{  0.0f,  0.0f,  1.0f  },
-		{  0.1f,  0.0f,  0.9f  },
-		{  0.0f,  0.0f,  1.0f  },
-	};
-
-	// ---- create axis vertex buffer ----
-	int numAxisVertices = sizeof(axisVertices) / ( sizeof(float) * 3 );
-	numAxisLines = numAxisVertices / 2;
-	pd3dDevice->CreateVertexBuffer( numAxisVertices*sizeof(LineVertex),
-                                      D3DUSAGE_WRITEONLY,
-                                      LineVertex::FVF_Flags,
-                                      //D3DPOOL_MANAGED, // does not have to be properly Released before calling IDirect3DDevice9::Reset
-                                      D3DPOOL_DEFAULT,   // must be Released properly before calling IDirect3DDevice9::Reset
-                                      &pAxisVertexBuffer, NULL );
+	pd3dDevice->SetRenderState( D3DRS_LIGHTING , TRUE);
 
 
-	// ---- scale and add offset to axis ----
-	float aScale  = 5;
-	float yOffset = 0.02f;
- 	LineVertex *pAxisVertices = axisVertices;
-	for (int av=0; av<numAxisVertices; av++)
-	{
-		pAxisVertices->x *= aScale;
-		pAxisVertices->y  = pAxisVertices->y * aScale + yOffset;
-		pAxisVertices->z *= aScale;
-		pAxisVertices++;
-	}
+	// ---- ambient light ----
 
-	// ---- block copy into axis vertex buffer ----
-	void *pVertices = NULL;
-	pAxisVertexBuffer->Lock( 0, sizeof(axisVertices), (void**)&pVertices, 0 );
-	memcpy( pVertices, axisVertices, sizeof(axisVertices) );
-	pAxisVertexBuffer->Unlock();
+	pd3dDevice->SetRenderState( D3DRS_AMBIENT,D3DCOLOR_COLORVALUE( 0.3, 0.3, 0.3, 1.0));
 
 
-	// ---- QUAD ----
+	// ---- sun light ----
+
+   // pd3dDevice->SetLight( 0, &sunLight );
+    //pd3dDevice->LightEnable( 0, TRUE );
 
 
-    // ---- initialise quad vertex data ----
+	// ---- back light ----
+
+	pd3dDevice->SetLight( 1, &surfaceLight );
+  pd3dDevice->LightEnable( 1, TRUE );
+
+
+    // ---- create a texture object ----
+
+    D3DXCreateTextureFromFile( pd3dDevice, "assests/water_texture.tga", &waveTexture );
+
+    pd3dDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
+    pd3dDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
+
+
+    // ---- create a vertex buffer ----
+
  	QuadVertex quadVertices[] =
 	{
 		//    x      y      z     nx     ny     nz     d,   tu     tv
-		{  5.0f,  0.0f,  5.0f,  0.0f,  1.0f,  0.0f,    0,  0.0f,  0.0f },
-		{ -5.0f,  0.0f,  5.0f,  0.0f,  1.0f,  0.0f,    0,  1.0f,  0.0f },
-		{  5.0f,  0.0f, -5.0f,  0.0f,  1.0f,  0.0f,    0,  0.0f,  1.0f },
-		{ -5.0f,  0.0f, -5.0f,  0.0f,  1.0f,  0.0f,    0,  1.0f,  1.0f }
+		{  5.0f,  0.0f, -5.0f,  0.0f,  1.0f,  0.0f,    0,  0.0f,  0.0f },
+		{  5.0f,  0.0f,  5.0f,  0.0f,  1.0f,  0.0f,    0,  1.0f,  0.0f },
+		{ -5.0f,  0.0f, -5.0f,  0.0f,  1.0f,  0.0f,    0,  0.0f,  1.0f },
+		{ -5.0f,  0.0f,  5.0f,  0.0f,  1.0f,  0.0f,    0,  1.0f,  1.0f }
 	};
 
-	// ---- create quad vertex buffer ----
-	int numQuadVertices = sizeof(quadVertices) / ( sizeof(float) * 8 +  sizeof(DWORD));
-	numQuadTriangles = numQuadVertices / 2;
-	pd3dDevice->CreateVertexBuffer( numQuadVertices*sizeof(QuadVertex),
+	pd3dDevice->CreateVertexBuffer( 4*sizeof(QuadVertex),
                                       D3DUSAGE_WRITEONLY,
                                       QuadVertex::FVF_Flags,
                                       //D3DPOOL_MANAGED, // does not have to be properly Released before calling IDirect3DDevice9::Reset
                                       D3DPOOL_DEFAULT,   // must be Released properly before calling IDirect3DDevice9::Reset
-                                      &pQuadVertexBuffer, NULL );
+                                      &pVertexBuffer, NULL );
 
+	void *pVertices = NULL;
 
-	// ---- block copy into quad vertex buffer ----
-	pVertices = NULL;
-	pQuadVertexBuffer->Lock( 0, sizeof(quadVertices), (void**)&pVertices, 0 );
+	pVertexBuffer->Lock( 0, sizeof(quadVertices), (void**)&pVertices, 0 );
 	memcpy( pVertices, quadVertices, sizeof(quadVertices) );
-	pQuadVertexBuffer->Unlock();
+	pVertexBuffer->Unlock();
 
 
-	// ---- VECTORS ----
+	// ---- Create a plane ----
+
+	meshParams[0] = -15;
+	meshParams[1] = -15;
+	meshParams[2] = 15;
+	meshParams[3] = 15;
+	meshParams[4] = 0;
+	meshParams[5] = 0;
+	meshParams[6] = 1;
+	meshParams[7] = 1;
+
+	meshVertsWidth = 10;
+	meshVertsDepth = 10;
+
+	plane(pd3dDevice, meshVertsWidth, meshVertsDepth, meshParams);
 
 
-	// ---- initialise vector vertex data ----
- 	LineVertex vectVertices[] =
-	{
-		//    x      y      z
-		{  0.0f,  0.0f,  0.0f  },
-		{  1.0f,  0.0f,  0.0f  },
-		{  0.0f,  0.0f,  0.0f  },
-		{  1.0f,  0.0f,  0.0f  },
-		{  0.0f,  0.0f,  0.0f  },
-		{  1.0f,  0.0f,  0.0f  }
-	};
-
-	// ---- create vector vertex buffer ----
-	int numVectVertices = sizeof(vectVertices) / ( sizeof(float) * 3 );
-	numVectLines = numVectVertices / 2;
-	pd3dDevice->CreateVertexBuffer( numVectVertices*sizeof(LineVertex),
-                                      D3DUSAGE_WRITEONLY,
-                                      LineVertex::FVF_Flags,
-                                      //D3DPOOL_MANAGED, // does not have to be properly Released before calling IDirect3DDevice9::Reset
-                                      D3DPOOL_DEFAULT,   // must be Released properly before calling IDirect3DDevice9::Reset
-                                      &pVectVertexBuffer, NULL );
-
-	// ---- block copy into vector vertex buffer ----
-	pVertices = NULL;
-	pVectVertexBuffer->Lock( 0, sizeof(vectVertices), (void**)&pVertices, 0 );
-	memcpy( pVertices, vectVertices, sizeof(vectVertices) );
-	pVectVertexBuffer->Unlock();
-
-
+	// CREATE SKYBOX
+	//buildSkybox(pd3dDevice);
+	
 	// ok
 	return true;
 
 }
 
 
+// ---------- create a mesh in the xz plane ----------
+
+/*!
+
+\brief create a mesh in the xz plane
+\author Gareth Edwards
+
+\param LPDIRECT3DDEVICE9	(device (IDirect3DDevice9*) )
+\param int					(row start in height field)
+\param int					(column start in height field)
+\param float*				(mesh parameters array - see below)
+
+\return bool (TRUE if ok)
+
+Mesh parameters array must contain eight values.
+
+These are:
+
+0: x minimum\n
+1: z minimum\n
+2: x maximum\n
+3: z maximum\n
+4: u minimum\n
+5: v minimum\n
+6: u maximum\n
+7: v maximum\n
+
+
+*/
+
+bool rtvsD3dApp::plane (
+			LPDIRECT3DDEVICE9	device,		// device
+			int					rows,		// row start in height field
+			int					cols,		// column start in height field
+			float*				meshParam)   // mesh parameters
+
+{
+
+	// catch allowed minima
+	rows = rows < 2 ? 2 : rows;
+	cols = cols < 2 ? 2 : cols;
+
+	// local mesh
+	vtxCols = cols;
+	vtxRows = rows;
+	celCols = cols-1;
+	celRows = rows-1;
+	unsigned int col,row;
+
+	// initialise mesh properties
+	vertexFormat = D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX1;
+	vertexSize   = 0;
+	vertices     = vtxRows * vtxCols;
+	faces        = celCols * celRows * 2;
+
+	// local D3DX
+    HRESULT		hr;
+	meshVertex*	pVertexData;
+	WORD*		pwIndexData;
+	DWORD*		pAttBuf;
+
+	// create the mesh
+	hr  = D3DXCreateMeshFVF(
+		faces,
+		vertices,
+		0,
+		vertexFormat,
+		device,
+		&pMesh);
+		if (FAILED(hr))
+		{
+			::MessageBox(0, "Error : mesh::plane - D3DXCreateMeshFVF() - FAILED", 0, 0);
+			return false;
+		}
+
+	// ---- INDEX BUFFER ----
+
+	// lock and fill index buffer.
+	hr = pMesh->LockIndexBuffer(0, (void**) &pwIndexData);
+
+	// local
+	unsigned int ro, ol, oh;
+	for (row=0; row<celRows; row++)
+	{
+		ro = row * vtxCols;
+		for (col=0; col<celCols; col++) {
+			ol = ro + col;
+			oh = ro + col + vtxCols;
+			*(pwIndexData+0) = ol;
+			*(pwIndexData+1) = ol+1;
+			*(pwIndexData+2) = oh;
+			*(pwIndexData+3) = oh;
+			*(pwIndexData+4) = ol+1;
+			*(pwIndexData+5) = oh+1;
+			pwIndexData += 6;
+		}
+	}
+	hr = pMesh->UnlockIndexBuffer();
+
+
+	// ---- ATTRIBUTE BUFFER ----
+
+	// lock and fill attribute buffer.
+	hr = pMesh->LockAttributeBuffer(0, &pAttBuf);
+	for(unsigned int f=0; f<faces; f++)
+		pAttBuf[f]= 0;
+	hr = pMesh->UnlockAttributeBuffer();
+
+
+	// ---- VERTEX BUFFER ----
+
+	// lock and fill vertex buffer.
+	hr = pMesh->LockVertexBuffer(0, (void**) &pVertexData);
+
+
+	// mesh parameters
+	int   vindex = 0;
+
+	// dimensions
+	float xWidth = meshParam[2]-meshParam[0];
+	float zDepth = meshParam[3]-meshParam[1];
+	float xMin   = meshParam[0];
+	float zMin   = meshParam[1];
+
+	// mapping
+	float uWidth = meshParam[6]-meshParam[4];
+	float vDepth = meshParam[7]-meshParam[5];
+	float uMin   = meshParam[4];
+	float vMin   = meshParam[5];
+
+	// for each row of the mesh
+	for (row=0; row<=celRows; row++)
+	{
+
+		// y & v ordinates
+		float rmu = float(row)/float(celRows);
+		float z   = rmu * zDepth + zMin;
+		float v   = (1-rmu) * vDepth + vMin;
+
+		// for each column of the mesh
+		for (col=0; col<=celCols; col++)
+		{
+			// vertex
+			float cmu = float(col)/float(celCols);
+		    pVertexData[vindex].x   = (1-cmu) * xWidth + xMin;
+			pVertexData[vindex].y   = 0.0;
+			pVertexData[vindex].z   = z;
+
+			// calculate y and surface normals
+			pVertexData[vindex].nx  =  0.0;
+			pVertexData[vindex].ny  = 1.0;
+			pVertexData[vindex].nz  =  0.0;
+
+			// texture vertex
+			pVertexData[vindex].tu  = cmu * uWidth + uMin;
+			pVertexData[vindex].tv  = v;
+
+			// increment vertex index
+			vindex++;
+		}
+	}
+
+	// unlock
+	hr = pMesh->UnlockVertexBuffer();
+
+
+	// done
+    return true;
+}
+
+// ---------- update mesh in y using a sine wave ----------
+/*!
+
+\brief update mesh in y using a sine wave
+\author Gareth Edwards
+\param float* (sin wave parameters array - see below)
+
+\return bool (TRUE if ok)
+
+Sine wave parameters array must contain six values.
+
+These are:
+
+0: x emitter
+1: z emitter
+2: amplitude
+3: period
+4: phaseShift
+5: yOffset
+
+*/
+bool rtvsD3dApp::meshUpdateY (float* sineParam, float step)
+
+{
+    // wave
+    float emitterX   = sineParam[0];
+    float emitterZ   = sineParam[1];
+    float amplitude  = sineParam[2];
+    float period     = sineParam[3];
+    float phaseShift = sineParam[4];
+    float phaseIncr  = sineParam[5];
+    float yOffset    = sineParam[6];
+
+    // ---- lock vertex buffer ----
+    meshVertex*    pVertexData;
+    HRESULT hr = pMesh->LockVertexBuffer(0, (void**) &pVertexData);
+
+    // for each vertex
+    for (DWORD v=0; v<vertices; v++)
+    {
+
+        // wave
+        float xd = pVertexData->x - emitterX;
+        float zd = pVertexData->z - emitterZ;
+        float d  = sqrt(xd*xd+zd*zd);
+        pVertexData->y = amplitude * sin( (period*d + step*phaseShift) * float(0.01745329252) ) + yOffset;
+
+        // next
+        pVertexData++;
+
+    }
+
+    // ---- unlock ----
+    hr = pMesh->UnlockVertexBuffer();
+
+    // done
+    return true;
+}
+
+
+
 
 
 ////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-// ---- vector demos ----
-
-#define VLEN 4
-
-DWORD rtvsD3dApp::vectorAdd()
-{
-	Vector3D o( 0, 0, 0);
-	Vector3D a( VLEN, VLEN, VLEN);
-	Vector3D b( VLEN, VLEN,-VLEN);
-	Vector3D c = a + b;
-	vectorLine(0, o, a);
-	vectorLine(1, o, b);
-	vectorLine(2, o, c);
-	return 3;
-}
-
-
-DWORD rtvsD3dApp::vectorSubtract()
-{
-	Vector3D o( 0, 0, 0);
-	Vector3D a( VLEN, VLEN, VLEN);
-	Vector3D b( VLEN, VLEN,-VLEN);
-	Vector3D c = a - b;
-	vectorLine(0, o, a);
-	vectorLine(1, o, b);
-	vectorLine(2, o, c);
-	return 3;
-}
-
-
-DWORD rtvsD3dApp::vectorMultiply()
-{
-	Vector3D o( 0, 0, 0);
-	Vector3D a( VLEN, VLEN, 0);
-	Vector3D b = a * 2;
-	vectorLine(0, o, b);
-	vectorLine(1, o, a);
-	return 2;
-}
-
-
-DWORD rtvsD3dApp::vectorDivide()
-{
-	Vector3D o( 0, 0, 0);
-	Vector3D a( VLEN, VLEN, 0);
-	Vector3D b = a / 2;
-	vectorLine(0, o, a);
-	vectorLine(1, o, b);
-	return 2;
-}
-
-
-DWORD rtvsD3dApp::vectorNegate()
-{
-	Vector3D o( 0, 0, 0);
-	Vector3D a( VLEN, VLEN, 0);
-	Vector3D b( VLEN, VLEN, 0);
-	b.negate();
-	vectorLine(0, o, a);
-	vectorLine(1, o, b);
-	return 2;
-}
-
-
-DWORD rtvsD3dApp::vectorNormalise()
-{
-	Vector3D o( 0, 0, 0);
-	Vector3D a( VLEN, VLEN, 0);
-	Vector3D b( VLEN, VLEN, 0);
-	b.normalize();
-	vectorLine(0, o, a);
-	vectorLine(1, o, b);
-	return 2;
-}
-
-
-DWORD rtvsD3dApp::vectorCross()
-{
-	Vector3D o( 0, 0,-0);
-	Vector3D a( VLEN, VLEN, VLEN);
-	Vector3D b( VLEN, VLEN,-VLEN);
-	Vector3D c( VLEN, VLEN,-VLEN);
-	c.crossProduct(a);
-	vectorLine(0, o, a);
-	vectorLine(1, o, b);
-	vectorLine(2, o, c);
-	return 3;
-}
-
-
-DWORD rtvsD3dApp::vectorDot()
-{
-	Vector3D o( 0, 0,-0);
-	Vector3D a( VLEN, VLEN, VLEN);
-	Vector3D b( VLEN, VLEN,-VLEN);
-	Vector3D c;
-
-	double d = b.dotProduct(a);
-
-	c.x = (a.x + b.x) / 2;
-	c.y = (a.y + b.y) / 2;
-	c.z = (a.z + b.z) / 2;
-
-	double l =c.length();
-	c.x *= d/l;
-	c.y *= d/l;
-	c.z *= d/l;
-
-	vectorLine(0, o, a);
-	vectorLine(1, o, b);
-	vectorLine(2, o, c);
-	return 3;
-}
-
-
-DWORD rtvsD3dApp::vectorLine(int lineIndex, Vector3D s, Vector3D e)
-{
-	// catch illegal line index
-	if (lineIndex < 0 || lineIndex > 2)
-		return 0;
-
-	// ---- update vector vertex buffer ----
-	LineVertex *pVertices = NULL;
-	pVectVertexBuffer->Lock( 0, sizeof(LineVertex) * 6, (void**)&pVertices, 0 );
-	pVertices += lineIndex*2;
-	pVertices->x = (float)s.x;
-	pVertices->y = (float)s.y;
-	pVertices->z = (float)s.z;
-	pVertices++;
-	pVertices->x = (float)e.x;
-	pVertices->y = (float)e.y;
-	pVertices->z = (float)e.z;
-	pVectVertexBuffer->Unlock();
-
-	// ok
-	return 1;
-}
-
 
 
 // ---------- update keyboard ----------

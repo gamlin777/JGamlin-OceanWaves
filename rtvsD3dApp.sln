@@ -1,7 +1,7 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rtvsD3dApp", "rtvsD3dApp.vcproj", "{571D0F90-0421-454D-8795-3CDC19C14A4F}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rtvsD3dApp", "rtvsD3dApp.vcxproj", "{571D0F90-0421-454D-8795-3CDC19C14A4F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

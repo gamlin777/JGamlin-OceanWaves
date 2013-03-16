@@ -105,7 +105,7 @@ int WINAPI WinMain( HINSTANCE hInstance,
 
 	// create window
     g_hWnd = CreateWindowEx( NULL, winClassName, 
-                             "Application Framework Demo",
+                             "JGamlin Ocean Waves",
                              WS_OVERLAPPEDWINDOW | WS_VISIBLE,
                              0, 0, 1200, 800, NULL, NULL, hInstance, NULL );
 
@@ -325,8 +325,8 @@ void cleanup( void )
         {
             static char strError[256];
             sprintf_s( strError, 256,
-				"The device object failed to cleanup properly. \n"
-                "Release() returned a reference count of %d",
+				"The device (g_pd3dDevice) object failed to cleanup properly. \n"
+                "Release() returned a reference count (nNewRefCount) of %d",
 				nNewRefCount );
             MessageBox( NULL, strError, "ERROR", MB_OK | MB_ICONEXCLAMATION );
         }
