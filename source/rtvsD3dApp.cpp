@@ -81,7 +81,8 @@ rtvsD3dApp::rtvsD3dApp (int id)
 
 bool rtvsD3dApp::cleanup ()
 {
-
+	
+	
 	// ok
 	return true;
 
@@ -105,6 +106,7 @@ bool rtvsD3dApp::cleanup ()
 
 bool rtvsD3dApp::cleanupDX (LPDIRECT3DDEVICE9 pd3dDevice)
 {
+	
 
      // ---- invalidate the font object ----
 
@@ -123,13 +125,17 @@ bool rtvsD3dApp::cleanupDX (LPDIRECT3DDEVICE9 pd3dDevice)
         }
 
         pFont = NULL;
+		
     }
 
 
    // ---- invalidate the texture object ----
 
-    TwTerminate();//cleanup anttweakbar
-
+    
+	pMesh->Release();
+	waveTexture->Release();
+	TwTerminate();//cleanup anttweakbar
+	pVertexBuffer->Release();
 	// ok
 	return true;
 

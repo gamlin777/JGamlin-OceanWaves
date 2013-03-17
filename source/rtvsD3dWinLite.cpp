@@ -150,6 +150,7 @@ int WINAPI WinMain( HINSTANCE hInstance,
 	// non-device one time application cleanup
 	g_app->cleanup();
 
+
 	// unregister windows class
     UnregisterClass(
 		winClassName,
@@ -317,7 +318,7 @@ void cleanup( void )
 
     cleanupDX();
 
-
+	
 	// ---- cleanup the device ----
 
     if( g_pd3dDevice != NULL )
