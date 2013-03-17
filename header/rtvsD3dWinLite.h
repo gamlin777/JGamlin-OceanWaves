@@ -89,5 +89,4 @@ rtvsD3dApp*	g_app;
 
 
 
-
 #endif // _rtvsD3dWinLite_

@@ -32,7 +32,7 @@
 #include <d3d9.h>
 #include <d3dx9.h>
 #include "../header/vector.h"
-
+#include <AntTweakBar.h>
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -156,7 +156,7 @@ public:
 
 	float sineWaveParameters[7];
 	float frame;
-
+	bool wireframe;
 };
 
 

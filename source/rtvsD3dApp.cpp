@@ -128,7 +128,7 @@ bool rtvsD3dApp::cleanupDX (LPDIRECT3DDEVICE9 pd3dDevice)
 
    // ---- invalidate the texture object ----
 
-    
+    TwTerminate();//cleanup anttweakbar
 
 	// ok
 	return true;
@@ -158,7 +158,7 @@ bool rtvsD3dApp::display (LPDIRECT3DDEVICE9 pd3dDevice)
     pd3dDevice->Clear( 0,
 		NULL,
 		D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER,
-		D3DCOLOR_COLORVALUE(0.0f,0.3f,0.7f,1.0f),
+		D3DCOLOR_COLORVALUE(1.0f,1.0f,1.0f,1.0f),
 		1.0f,
 		0);
 
@@ -190,15 +190,32 @@ bool rtvsD3dApp::display (LPDIRECT3DDEVICE9 pd3dDevice)
 
 	
 	// locate
-	D3DXMatrixTranslation( &matTranslation, 0, -4, 50 );
+	D3DXMatrixTranslation( &matTranslation, 0, -6, 60 );
 	matWorld = matRotation * matTranslation;
 	pd3dDevice->SetTransform( D3DTS_WORLD, &matWorld );
 
+	
+	// mesh
+	
+
+	if (wireframe == true) {
 	pd3dDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
+	} else { 
+		
+			pd3dDevice->SetMaterial( &quadMtrl );
+			pd3dDevice->SetTexture( 0, waveTexture );
+			pd3dDevice->SetFVF( QuadVertex::FVF_Flags );
+			pd3dDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
+			pd3dDevice->SetTexture(0, waveTexture);
+	}
+	
 	frame++;
 	meshUpdateY(sineWaveParameters, frame);							//frame increments thus the function does
 
-	pMesh->DrawSubset(0);
+	pMesh->DrawSubset(0); //draw mesh
+
+	TwDraw();  // draw the tweak bar(s)
+
 	// ok
 	return true;
 
@@ -272,15 +289,21 @@ bool rtvsD3dApp::setup ()
 	sineWaveParameters[4] = 0.5;
 	sineWaveParameters[5] = 0.5;
 	sineWaveParameters[6] = 0;
+	
 	frame = 0;
-
+	wireframe = false;
+	
 
 	// ok
 	return true;
 
 }
 
-
+void TW_CALL wfButton(void *clientData) //wireframe button
+	{ 
+    bool* wireframe = static_cast<bool*> (clientData);
+	*wireframe = !*wireframe;
+	}
 
 
 // ---------- framework : setup dx ----------
@@ -339,7 +362,7 @@ bool rtvsD3dApp::setupDX (LPDIRECT3DDEVICE9 pd3dDevice)
 
     // ---- create a texture object ----
 
-    D3DXCreateTextureFromFile( pd3dDevice, "assests/water_texture.tga", &waveTexture );
+    D3DXCreateTextureFromFile( pd3dDevice, "image/baboon.jpg", &waveTexture );
 
     pd3dDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
     pd3dDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
@@ -381,16 +404,29 @@ bool rtvsD3dApp::setupDX (LPDIRECT3DDEVICE9 pd3dDevice)
 	meshParams[6] = 1;
 	meshParams[7] = 1;
 
-	meshVertsWidth = 10;
-	meshVertsDepth = 10;
+	meshVertsWidth = 100;
+	meshVertsDepth = 100;
 
-	plane(pd3dDevice, meshVertsWidth, meshVertsDepth, meshParams);
+	plane(pd3dDevice, meshVertsWidth, meshVertsDepth, meshParams); //the mesh
 
 
-	// CREATE SKYBOX
-	//buildSkybox(pd3dDevice);
+	//anttweakbar
+	TwInit(TW_DIRECT3D9, pd3dDevice); // for Direct3D 9
+	TwWindowSize(1200, 800);
+	TwBar *myBar;
+	myBar = TwNewBar("Ocean Wave Settings");
+
+	TwAddVarRW(myBar, "sineParam[0]", TW_TYPE_FLOAT, &sineWaveParameters[0], " min=-25 max=25 step=0.02 group=WaveSource label='Emmiter X' ");
+	TwAddVarRW(myBar, "sineParam[1]", TW_TYPE_FLOAT, &sineWaveParameters[1], " min=-25 max=25 step=0.02 group=WaveSource label='Emmiter Z' ");
+	TwAddVarRW(myBar, "sineParam[2]", TW_TYPE_FLOAT, &sineWaveParameters[2], " min=-1.5 max=1.5 step=0.02 group=Characteristics label='Amplitude' ");
+	TwAddVarRW(myBar, "sineParam[3]", TW_TYPE_FLOAT, &sineWaveParameters[3], " min=0 max=100 step=0.05 group=Characteristics label='Period' ");
+	TwAddVarRW(myBar, "sineParam[4]", TW_TYPE_FLOAT, &sineWaveParameters[4], " min=0 max=5 step=0.01 group=Characteristics label='Phase Shift' ");
+	TwAddVarRW(myBar, "sineParam[5]", TW_TYPE_FLOAT, &sineWaveParameters[5], " min=-360 max=360 step=0.1 group=Characteristics label='Phase Incr' ");
+	TwAddVarRW(myBar, "sineParam[6]", TW_TYPE_FLOAT, &sineWaveParameters[6], " min=-1.5 max=1.5 step=0.02 group=Characteristics label='Y Offset' ");
 	
-	// ok
+	TwAddButton(myBar, "Mode", wfButton, &wireframe, " label='Wireframe' ");
+
+
 	return true;
 
 }

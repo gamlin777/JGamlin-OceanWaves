@@ -178,7 +178,10 @@ LRESULT CALLBACK WindowProc( HWND   hWnd,
                              WPARAM wParam,
                              LPARAM lParam )
 {
-    static POINT ptLastMousePosit;
+	if( TwEventWin(hWnd, msg, wParam, lParam) ) // send event message to AntTweakBar
+	{return 0;} // event has been handled by AntTweakBar
+   
+	static POINT ptLastMousePosit;
     static POINT ptCurrentMousePosit;
     static bool bMousing;
     
