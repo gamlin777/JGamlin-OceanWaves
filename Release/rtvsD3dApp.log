@@ -1,0 +1,17 @@
+﻿Build started 18/03/2013 01:26:15.
+     1>Project "C:\Users\James\Documents\GitHub\JGamlin-OceanWaves\rtvsD3dApp.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating ".\Release\rtvsD3dApp.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Ob1 /Oy- /D WIN32 /D NDEBUG /D _WINDOWS /D _VC80_UPGRADE=0x0710 /D _MBCS /GF /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo".\Release/" /Fd".\Release/vc100.pdb" /Gd /TP /analyze- /errorReport:prompt source\rtvsD3dApp.cpp source\rtvsD3dWinLite.cpp source\vector.cpp
+         rtvsD3dApp.cpp
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\../header/rtvsD3dApp.h(33): fatal error C1083: Cannot open include file: 'd3dx9.h': No such file or directory
+         rtvsD3dWinLite.cpp
+     1>source\rtvsD3dWinLite.cpp(34): fatal error C1083: Cannot open include file: 'd3dx9.h': No such file or directory
+         vector.cpp
+         Generating Code...
+     1>Done Building Project "C:\Users\James\Documents\GitHub\JGamlin-OceanWaves\rtvsD3dApp.vcxproj" (build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:02.46

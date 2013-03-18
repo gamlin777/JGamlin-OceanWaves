@@ -20,6 +20,12 @@
 
 #include "../header/rtvsD3dApp.h"
 #include "../header/vector.h"
+#include <string>
+using namespace std;
+#include <iostream>
+#include <fstream>
+#include <stdio.h>
+#include <stdlib.h>
 
 
 
@@ -129,10 +135,10 @@ bool rtvsD3dApp::cleanupDX (LPDIRECT3DDEVICE9 pd3dDevice)
     }
 
 	//Cleanup 
-	pMesh->Release();
-	waveTexture->Release();
 	TwTerminate();//cleanup anttweakbar
+	waveTexture->Release();
 	pVertexBuffer->Release();
+	pMesh->Release();
 	// ok
 	return true;
 
@@ -296,6 +302,234 @@ bool rtvsD3dApp::setup ()
 	frame = 0;
 	wireframe = false;
 	
+	
+	//File Manager
+	int currentWave;
+
+	struct waveFile {
+				int   id;
+				float emX;
+				float emZ;
+				float amp;
+				float prd;
+				float phS;
+				float phI;
+				float Yoff;
+			};
+
+	waveFile wave[9];
+
+	string wav_line1_id;
+	string wav_line2_emX;
+	string wav_line3_emZ;
+	string wav_line4_amp;
+	string wav_line5_prd;
+	string wav_line6_phS;
+	string wav_line7_phI;
+	string wav_line8_Yoff;
+
+	
+
+	// Collects all the data from the config files
+
+	ifstream ifile;
+
+			//Collects all the data from the config files
+			ifile.open("config/wave0.txt");
+
+			getline(ifile, wav_line1_id);
+			getline(ifile, wav_line2_emX);
+			getline(ifile, wav_line3_emZ);
+			getline(ifile, wav_line4_amp);
+			getline(ifile, wav_line5_prd);
+			getline(ifile, wav_line6_phS);
+			getline(ifile, wav_line7_phI);
+			getline(ifile, wav_line8_Yoff);
+
+			wave[0].id   = ::atoi(wav_line1_id.c_str());
+			wave[0].emX  = ::atof(wav_line2_emX.c_str());
+			wave[0].emZ  = ::atof(wav_line3_emZ.c_str());
+			wave[0].amp  = ::atof(wav_line4_amp.c_str());
+			wave[0].prd  = ::atof(wav_line5_prd.c_str());
+			wave[0].phS  = ::atof(wav_line6_phS.c_str());
+			wave[0].phI  = ::atof(wav_line7_phI.c_str());
+			wave[0].Yoff = ::atof(wav_line8_Yoff.c_str());
+			
+			ifile.close();
+
+			ifile.open("config/wave1.txt");
+
+			getline(ifile, wav_line1_id);
+			getline(ifile, wav_line2_emX);
+			getline(ifile, wav_line3_emZ);
+			getline(ifile, wav_line4_amp);
+			getline(ifile, wav_line5_prd);
+			getline(ifile, wav_line6_phS);
+			getline(ifile, wav_line7_phI);
+			getline(ifile, wav_line8_Yoff);
+
+			wave[1].id   = ::atoi(wav_line1_id.c_str());
+			wave[1].emX  = ::atof(wav_line2_emX.c_str());
+			wave[1].emZ  = ::atof(wav_line3_emZ.c_str());
+			wave[1].amp  = ::atof(wav_line4_amp.c_str());
+			wave[1].prd  = ::atof(wav_line5_prd.c_str());
+			wave[1].phS  = ::atof(wav_line6_phS.c_str());
+			wave[1].phI  = ::atof(wav_line7_phI.c_str());
+			wave[1].Yoff = ::atof(wav_line8_Yoff.c_str());
+			
+			ifile.close();
+			ifile.open("config/wave2.txt");
+
+			getline(ifile, wav_line1_id);
+			getline(ifile, wav_line2_emX);
+			getline(ifile, wav_line3_emZ);
+			getline(ifile, wav_line4_amp);
+			getline(ifile, wav_line5_prd);
+			getline(ifile, wav_line6_phS);
+			getline(ifile, wav_line7_phI);
+			getline(ifile, wav_line8_Yoff);
+
+			wave[2].id   = ::atoi(wav_line1_id.c_str());
+			wave[2].emX  = ::atof(wav_line2_emX.c_str());
+			wave[2].emZ  = ::atof(wav_line3_emZ.c_str());
+			wave[2].amp  = ::atof(wav_line4_amp.c_str());
+			wave[2].prd  = ::atof(wav_line5_prd.c_str());
+			wave[2].phS  = ::atof(wav_line6_phS.c_str());
+			wave[2].phI  = ::atof(wav_line7_phI.c_str());
+			wave[2].Yoff = ::atof(wav_line8_Yoff.c_str());
+			
+			ifile.close();
+			ifile.open("config/wave3.txt");
+
+			getline(ifile, wav_line1_id);
+			getline(ifile, wav_line2_emX);
+			getline(ifile, wav_line3_emZ);
+			getline(ifile, wav_line4_amp);
+			getline(ifile, wav_line5_prd);
+			getline(ifile, wav_line6_phS);
+			getline(ifile, wav_line7_phI);
+			getline(ifile, wav_line8_Yoff);
+
+			wave[3].id   = ::atoi(wav_line1_id.c_str());
+			wave[3].emX  = ::atof(wav_line2_emX.c_str());
+			wave[3].emZ  = ::atof(wav_line3_emZ.c_str());
+			wave[3].amp  = ::atof(wav_line4_amp.c_str());
+			wave[3].prd  = ::atof(wav_line5_prd.c_str());
+			wave[3].phS  = ::atof(wav_line6_phS.c_str());
+			wave[3].phI  = ::atof(wav_line7_phI.c_str());
+			wave[3].Yoff = ::atof(wav_line8_Yoff.c_str());
+
+			
+			
+			ifile.close();
+			ifile.open("config/wave4.txt");
+
+			getline(ifile, wav_line1_id);
+			getline(ifile, wav_line2_emX);
+			getline(ifile, wav_line3_emZ);
+			getline(ifile, wav_line4_amp);
+			getline(ifile, wav_line5_prd);
+			getline(ifile, wav_line6_phS);
+			getline(ifile, wav_line7_phI);
+			getline(ifile, wav_line8_Yoff);
+
+			wave[4].id   = ::atoi(wav_line1_id.c_str());
+			wave[4].emX  = ::atof(wav_line2_emX.c_str());
+			wave[4].emZ  = ::atof(wav_line3_emZ.c_str());
+			wave[4].amp  = ::atof(wav_line4_amp.c_str());
+			wave[4].prd  = ::atof(wav_line5_prd.c_str());
+			wave[4].phS  = ::atof(wav_line6_phS.c_str());
+			wave[4].phI  = ::atof(wav_line7_phI.c_str());
+			wave[4].Yoff = ::atof(wav_line8_Yoff.c_str());
+			
+			ifile.close();
+			ifile.open("config/wave5.txt");
+
+			getline(ifile, wav_line1_id);
+			getline(ifile, wav_line2_emX);
+			getline(ifile, wav_line3_emZ);
+			getline(ifile, wav_line4_amp);
+			getline(ifile, wav_line5_prd);
+			getline(ifile, wav_line6_phS);
+			getline(ifile, wav_line7_phI);
+			getline(ifile, wav_line8_Yoff);
+
+			wave[5].id   = ::atoi(wav_line1_id.c_str());
+			wave[5].emX  = ::atof(wav_line2_emX.c_str());
+			wave[5].emZ  = ::atof(wav_line3_emZ.c_str());
+			wave[5].amp  = ::atof(wav_line4_amp.c_str());
+			wave[5].prd  = ::atof(wav_line5_prd.c_str());
+			wave[5].phS  = ::atof(wav_line6_phS.c_str());
+			wave[5].phI  = ::atof(wav_line7_phI.c_str());
+			wave[5].Yoff = ::atof(wav_line8_Yoff.c_str());
+
+			ifile.close();
+			ifile.open("config/wave6.txt");
+
+			getline(ifile, wav_line1_id);
+			getline(ifile, wav_line2_emX);
+			getline(ifile, wav_line3_emZ);
+			getline(ifile, wav_line4_amp);
+			getline(ifile, wav_line5_prd);
+			getline(ifile, wav_line6_phS);
+			getline(ifile, wav_line7_phI);
+			getline(ifile, wav_line8_Yoff);
+
+			wave[6].id   = ::atoi(wav_line1_id.c_str());
+			wave[6].emX  = ::atof(wav_line2_emX.c_str());
+			wave[6].emZ  = ::atof(wav_line3_emZ.c_str());
+			wave[6].amp  = ::atof(wav_line4_amp.c_str());
+			wave[6].prd  = ::atof(wav_line5_prd.c_str());
+			wave[6].phS  = ::atof(wav_line6_phS.c_str());
+			wave[6].phI  = ::atof(wav_line7_phI.c_str());
+			wave[6].Yoff = ::atof(wav_line8_Yoff.c_str());
+
+			ifile.close();
+			ifile.open("config/wave7.txt");
+
+			getline(ifile, wav_line1_id);
+			getline(ifile, wav_line2_emX);
+			getline(ifile, wav_line3_emZ);
+			getline(ifile, wav_line4_amp);
+			getline(ifile, wav_line5_prd);
+			getline(ifile, wav_line6_phS);
+			getline(ifile, wav_line7_phI);
+			getline(ifile, wav_line8_Yoff);
+
+			wave[7].id   = ::atoi(wav_line1_id.c_str());
+			wave[7].emX  = ::atof(wav_line2_emX.c_str());
+			wave[7].emZ  = ::atof(wav_line3_emZ.c_str());
+			wave[7].amp  = ::atof(wav_line4_amp.c_str());
+			wave[7].prd  = ::atof(wav_line5_prd.c_str());
+			wave[7].phS  = ::atof(wav_line6_phS.c_str());
+			wave[7].phI  = ::atof(wav_line7_phI.c_str());
+			wave[7].Yoff = ::atof(wav_line8_Yoff.c_str());
+			
+			ifile.close();
+			ifile.open("config/wave8.txt");
+
+			getline(ifile, wav_line1_id);
+			getline(ifile, wav_line2_emX);
+			getline(ifile, wav_line3_emZ);
+			getline(ifile, wav_line4_amp);
+			getline(ifile, wav_line5_prd);
+			getline(ifile, wav_line6_phS);
+			getline(ifile, wav_line7_phI);
+			getline(ifile, wav_line8_Yoff);
+
+			wave[8].id   = ::atoi(wav_line1_id.c_str());
+			wave[8].emX  = ::atof(wav_line2_emX.c_str());
+			wave[8].emZ  = ::atof(wav_line3_emZ.c_str());
+			wave[8].amp  = ::atof(wav_line4_amp.c_str());
+			wave[8].prd  = ::atof(wav_line5_prd.c_str());
+			wave[8].phS  = ::atof(wav_line6_phS.c_str());
+			wave[8].phI  = ::atof(wav_line7_phI.c_str());
+			wave[8].Yoff = ::atof(wav_line8_Yoff.c_str());
+
+			ifile.close();
+
+
+			
 
 	// ok
 	return true;
@@ -421,7 +655,7 @@ bool rtvsD3dApp::setupDX (LPDIRECT3DDEVICE9 pd3dDevice)
 	TwAddVarRW(myBar, "sineParam[1]", TW_TYPE_FLOAT, &sineWaveParameters[1], " min=-25 max=25 step=0.02 group=WaveSource label='Emmiter Z' ");
 	TwAddVarRW(myBar, "sineParam[2]", TW_TYPE_FLOAT, &sineWaveParameters[2], " min=-1.5 max=1.5 step=0.02 group=Characteristics label='Amplitude' ");
 	TwAddVarRW(myBar, "sineParam[3]", TW_TYPE_FLOAT, &sineWaveParameters[3], " min=0 max=100 step=0.05 group=Characteristics label='Period' ");
-	TwAddVarRW(myBar, "sineParam[4]", TW_TYPE_FLOAT, &sineWaveParameters[4], " min=0 max=5 step=0.01 group=Characteristics label='Phase Shift' ");
+	TwAddVarRW(myBar, "sineParam[4]", TW_TYPE_FLOAT, &sineWaveParameters[4], " min=-5 max=5 step=0.01 group=Characteristics label='Phase Shift' ");
 	TwAddVarRW(myBar, "sineParam[5]", TW_TYPE_FLOAT, &sineWaveParameters[5], " min=-360 max=360 step=0.1 group=Characteristics label='Phase Incr' ");
 	TwAddVarRW(myBar, "sineParam[6]", TW_TYPE_FLOAT, &sineWaveParameters[6], " min=-1.5 max=1.5 step=0.02 group=Characteristics label='Y Offset' ");
 	
@@ -650,7 +884,7 @@ bool rtvsD3dApp::meshUpdateY (float* sineParam, float step)
         float xd = pVertexData->x - emitterX;
         float zd = pVertexData->z - emitterZ;
         float d  = sqrt(xd*xd+zd*zd);
-        pVertexData->y = amplitude * sin( (period*d + step*phaseShift) * float(0.01745329252) ) + yOffset;
+        pVertexData->y = amplitude * sin( (period*d - step*phaseShift) * float(0.01745329252) ) + yOffset;
 
 		//normals
 		if (v%xVertexCount==xVertexCount-1){

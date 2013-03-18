@@ -1,10 +1,76 @@
-﻿Build started 18/03/2013 00:01:55.
+﻿Build started 18/03/2013 18:48:06.
      1>Project "C:\Users\James\Documents\GitHub\JGamlin-OceanWaves\rtvsD3dApp.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating ".\Debug\rtvsD3dApp.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _VC80_UPGRADE=0x0710 /D _MBCS /Gm- /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo".\Debug/" /Fd".\Debug/vc100.pdb" /FR".\Debug\\" /Gd /TP /analyze- /errorReport:prompt source\rtvsD3dApp.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _VC80_UPGRADE=0x0710 /D _MBCS /Gm- /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo".\Debug/" /Fd".\Debug/vc100.pdb" /FR".\Debug\\" /Gd /TP /analyze- /errorReport:prompt source\rtvsD3dApp.cpp source\rtvsD3dWinLite.cpp
          rtvsD3dApp.cpp
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(350): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(351): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(352): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(353): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(354): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(355): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(356): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(372): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(373): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(374): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(375): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(376): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(377): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(378): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(393): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(394): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(395): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(396): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(397): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(398): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(399): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(414): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(415): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(416): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(417): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(418): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(419): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(420): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(437): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(438): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(439): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(440): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(441): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(442): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(443): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(458): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(459): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(460): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(461): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(462): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(463): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(464): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(479): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(480): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(481): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(482): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(483): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(484): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(485): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(500): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(501): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(502): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(503): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(504): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(505): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(506): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(521): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(522): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(523): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(524): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(525): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(526): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(527): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\james\documents\github\jgamlin-oceanwaves\source\rtvsd3dapp.cpp(307): warning C4101: 'currentWave' : unreferenced local variable
+         rtvsD3dWinLite.cpp
+         Generating Code...
        ResourceCompile:
          All outputs are up-to-date.
        Link:
@@ -25,4 +91,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:04.63
+Time Elapsed 00:00:07.08
