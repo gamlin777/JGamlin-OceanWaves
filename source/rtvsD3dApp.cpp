@@ -128,10 +128,7 @@ bool rtvsD3dApp::cleanupDX (LPDIRECT3DDEVICE9 pd3dDevice)
 		
     }
 
-
-   // ---- invalidate the texture object ----
-
-    
+	//Cleanup 
 	pMesh->Release();
 	waveTexture->Release();
 	TwTerminate();//cleanup anttweakbar
@@ -217,10 +214,12 @@ bool rtvsD3dApp::display (LPDIRECT3DDEVICE9 pd3dDevice)
 	
 	frame++;
 	meshUpdateY(sineWaveParameters, frame);							//frame increments thus the function does
-
 	pMesh->DrawSubset(0); //draw mesh
 
 	TwDraw();  // draw the tweak bar(s)
+
+	/*for (int i = 0; i < faces; i++)
+		meshNormal(vertices */
 
 	// ok
 	return true;
@@ -243,8 +242,6 @@ bool rtvsD3dApp::display (LPDIRECT3DDEVICE9 pd3dDevice)
 
 bool rtvsD3dApp::setup ()
 {
-
-   
 
 	// setup a material for the textured quad
     ZeroMemory( &quadMtrl, sizeof(D3DMATERIAL9) );
@@ -356,8 +353,8 @@ bool rtvsD3dApp::setupDX (LPDIRECT3DDEVICE9 pd3dDevice)
 
 	// ---- sun light ----
 
-   // pd3dDevice->SetLight( 0, &sunLight );
-    //pd3dDevice->LightEnable( 0, TRUE );
+    pd3dDevice->SetLight( 0, &sunLight );
+    pd3dDevice->LightEnable( 0, TRUE );
 
 
 	// ---- back light ----
@@ -368,11 +365,9 @@ bool rtvsD3dApp::setupDX (LPDIRECT3DDEVICE9 pd3dDevice)
 
     // ---- create a texture object ----
 
-    D3DXCreateTextureFromFile( pd3dDevice, "image/baboon.jpg", &waveTexture );
+    D3DXCreateTextureFromFile( pd3dDevice, "image/wave.jpg", &waveTexture );
 
     pd3dDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
-    pd3dDevice->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
-
 
     // ---- create a vertex buffer ----
 
@@ -646,6 +641,8 @@ bool rtvsD3dApp::meshUpdateY (float* sineParam, float step)
     HRESULT hr = pMesh->LockVertexBuffer(0, (void**) &pVertexData);
 
     // for each vertex
+	int xVertexCount = 100;
+
     for (DWORD v=0; v<vertices; v++)
     {
 
@@ -654,6 +651,15 @@ bool rtvsD3dApp::meshUpdateY (float* sineParam, float step)
         float zd = pVertexData->z - emitterZ;
         float d  = sqrt(xd*xd+zd*zd);
         pVertexData->y = amplitude * sin( (period*d + step*phaseShift) * float(0.01745329252) ) + yOffset;
+
+		//normals
+		if (v%xVertexCount==xVertexCount-1){
+			meshNormal(pVertexData-1, pVertexData+(xVertexCount+1), pVertexData+xVertexCount, pVertexData);
+		} else if (v>=vertices-vtxRows){
+			meshNormal(pVertexData-1, pVertexData-(xVertexCount+1), pVertexData-xVertexCount, pVertexData);
+		} else {
+			meshNormal(pVertexData+1, pVertexData+(xVertexCount+1), pVertexData+xVertexCount, pVertexData);
+		}
 
         // next
         pVertexData++;
@@ -666,6 +672,60 @@ bool rtvsD3dApp::meshUpdateY (float* sineParam, float step)
     // done
     return true;
 }
+
+// ---------- calculate mesh normal ----------
+
+/*!
+
+\brief calculate mesh normal
+\author Gareth Edwards
+
+\param meshVertex* (first vertex)
+\param meshVertex* (second vertex)
+\param meshVertex* (third vertex) 
+\param meshVertex* (returned normal)
+
+\return bool (TRUE if ok)
+
+*/
+
+void rtvsD3dApp::meshNormal (
+    meshVertex* v1,    //<! first vertex
+    meshVertex* v2,    //<! second vertex
+    meshVertex* v3,    //<! third vertex
+    meshVertex* v4)    //<! returned normal
+{
+
+    // local
+    float len;
+    float v1x, v1y, v1z;
+    float v2x, v2y, v2z;
+    float x,y,z;
+
+    // normal
+    v1x = v2->x - v1->x;
+    v1y = v2->y - v1->y;
+    v1z = v2->z - v1->z;
+
+    v2x = v3->x - v1->x;
+    v2y = v3->y - v1->y;
+    v2z = v3->z - v1->z;
+
+    x = v1y*v2z - v1z*v2y;
+    y = v1z*v2x - v1x*v2z;
+    z = v1x*v2y - v1y*v2x;
+
+    // normalise
+    len = (float) sqrt (x*x + y*y + z*z);
+    v4->nx = 0;
+	v4->ny = 0;
+	v4->nz = 0;
+	v4->nx += x / len;
+    v4->ny += y / len;
+    v4->nz += z / len;
+
+}
+
 
 
 

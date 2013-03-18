@@ -153,6 +153,7 @@ public:
 
 	bool plane (LPDIRECT3DDEVICE9, int,	int, float*);   // mesh parameters
 	bool meshUpdateY (float*, float);
+	void meshNormal (meshVertex*, meshVertex*, meshVertex*, meshVertex*);
 
 	float sineWaveParameters[7];
 	float frame;

@@ -1,12 +1,10 @@
-﻿Build started 17/03/2013 21:28:14.
+﻿Build started 18/03/2013 00:01:55.
      1>Project "C:\Users\James\Documents\GitHub\JGamlin-OceanWaves\rtvsD3dApp.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating ".\Debug\rtvsD3dApp.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _VC80_UPGRADE=0x0710 /D _MBCS /Gm- /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo".\Debug/" /Fd".\Debug/vc100.pdb" /FR".\Debug\\" /Gd /TP /analyze- /errorReport:prompt source\rtvsD3dApp.cpp source\rtvsD3dWinLite.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _VC80_UPGRADE=0x0710 /D _MBCS /Gm- /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo".\Debug/" /Fd".\Debug/vc100.pdb" /FR".\Debug\\" /Gd /TP /analyze- /errorReport:prompt source\rtvsD3dApp.cpp
          rtvsD3dApp.cpp
-         rtvsD3dWinLite.cpp
-         Generating Code...
        ResourceCompile:
          All outputs are up-to-date.
        Link:
@@ -27,4 +25,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:06.05
+Time Elapsed 00:00:04.63
