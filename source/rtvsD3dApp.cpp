@@ -57,7 +57,7 @@ rtvsD3dApp::rtvsD3dApp (int id)
 	_id = id;
 
 	// key clicked
-	currentKeyClicked = 1;
+	currentKeyClicked = 9;
 
 }
 
@@ -198,7 +198,11 @@ void TW_CALL saveButton(void *clientData)
 	rtvsD3dApp* applicationPointer = (rtvsD3dApp*)clientData;
 	applicationPointer->saveFile();
 }
-
+void TW_CALL homeButton(void *clientData)
+{
+	rtvsD3dApp* homePointer = (rtvsD3dApp*)clientData;
+	homePointer->currentKeyClicked = 9;
+}
 
 // ---------- framework : display ----------
 
@@ -266,7 +270,7 @@ bool rtvsD3dApp::display (LPDIRECT3DDEVICE9 pd3dDevice)
 
 	
 	// locate
-	D3DXMatrixTranslation( &matTranslation, 0, -6, 60 );
+	D3DXMatrixTranslation( &matTranslation, 0, -5, 40 );
 	matWorld = matRotation * matTranslation;
 	pd3dDevice->SetTransform( D3DTS_WORLD, &matWorld );
 
@@ -678,6 +682,7 @@ bool rtvsD3dApp::setupDX (LPDIRECT3DDEVICE9 pd3dDevice)
 		TwBar *myBar;
 	myBar = TwNewBar("Ocean Wave Settings");
 
+	TwAddButton(myBar, "Home", homeButton, this, " label='Home-(NumKey9)' ");
 	TwAddButton(myBar, "Mode", wfButton, &wireframe, " label='Wireframe' ");
 	TwAddButton(myBar, "SaveF", saveButton, this, " label='Save All' ");
 
@@ -701,9 +706,9 @@ bool rtvsD3dApp::setupDX (LPDIRECT3DDEVICE9 pd3dDevice)
 	TwAddVarRW(myBar, "wave3emz", TW_TYPE_FLOAT, &wave[3].emZ, " min=-25 max=25 step=0.02 group=Wave-3-(NumKey3) label='Emmiter Z' ");
 	TwAddVarRW(myBar, "wave3amp", TW_TYPE_FLOAT, &wave[3].amp, " min=-3 max=3 step=0.02 group=Wave-3-(NumKey3) label='Amplitude' ");
 	TwAddVarRW(myBar, "wave3prd", TW_TYPE_FLOAT, &wave[3].prd, " min=0 max=100 step=0.05 group=Wave-3-(NumKey3) label='Period' ");
-	TwAddVarRW(myBar, "wave4phs", TW_TYPE_FLOAT, &wave[3].phS, " min=-5 max=5 step=0.01 group=Wave-3-(NumKey3) label='Phase Shift' ");
-	TwAddVarRW(myBar, "wave4phi", TW_TYPE_FLOAT, &wave[3].phI, " min=-360 max=360 step=0.1 group=Wave-3-(NumKey3) label='Phase Incr' ");
-	TwAddVarRW(myBar, "wave4yoff", TW_TYPE_FLOAT, &wave[3].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-3-(NumKey3) label='Y Offset' ");
+	TwAddVarRW(myBar, "wave3phs", TW_TYPE_FLOAT, &wave[3].phS, " min=-5 max=5 step=0.01 group=Wave-3-(NumKey3) label='Phase Shift' ");
+	TwAddVarRW(myBar, "wave3phi", TW_TYPE_FLOAT, &wave[3].phI, " min=-360 max=360 step=0.1 group=Wave-3-(NumKey3) label='Phase Incr' ");
+	TwAddVarRW(myBar, "wave3yoff", TW_TYPE_FLOAT, &wave[3].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-3-(NumKey3) label='Y Offset' ");
 
 	TwAddVarRW(myBar, "wave4emx", TW_TYPE_FLOAT, &wave[4].emX, " min=-25 max=25 step=0.02 group=Wave-4-(NumKey4) label='Emmiter X' ");
 	TwAddVarRW(myBar, "wave4emz", TW_TYPE_FLOAT, &wave[4].emZ, " min=-25 max=25 step=0.02 group=Wave-4-(NumKey4) label='Emmiter Z' ");
@@ -1094,6 +1099,7 @@ bool rtvsD3dApp::saveFile() {
 \return bool (TRUE if key updated)
 
 */
+
 
 bool rtvsD3dApp::updateKeyboard ()
 {

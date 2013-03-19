@@ -89,6 +89,7 @@ public:
 	ID3DXFont*				pFont;
 	D3DCOLOR				fontCol;
 
+
 	LPDIRECT3DVERTEXBUFFER9	pVertexBuffer;
 	LPDIRECT3DTEXTURE9		waveTexture;
 	D3DMATERIAL9			quadMtrl;
@@ -161,6 +162,19 @@ public:
 	bool wireframe;
 	bool saveFile();
 	
+	
+
+	
+	struct TVertex
+{
+    float x, y, z;		// 3D world position
+    float tu, tv;		// Texture coordinates
+
+	enum FVF
+    {
+        FVF_Flags = D3DFVF_XYZ | D3DFVF_TEX1
+    };
+};
 
 		struct waveFile {
 				int   id;
