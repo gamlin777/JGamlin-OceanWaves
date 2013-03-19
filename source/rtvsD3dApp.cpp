@@ -164,10 +164,25 @@ bool rtvsD3dApp::cleanupDX (LPDIRECT3DDEVICE9 pd3dDevice)
         }
         pMesh = NULL;
     }
-	//Cleanup 
+	 
+	  if( waveTexture != NULL )
+    {
+        int nNewRefCount = waveTexture->Release();
+
+        if( nNewRefCount > 0 )
+        {
+            static char strError[256];
+            sprintf_s ( strError, 256,
+				"The line vertex buffer object failed to cleanup properly.\n"
+                "Release() returned a reference count of %d",
+				nNewRefCount );
+            MessageBox( NULL, strError, "ERROR", MB_OK | MB_ICONEXCLAMATION );
+        }
+        waveTexture = NULL;
+    }
+
 	TwTerminate();//cleanup anttweakbar
-	waveTexture->Release();
-	&IDirect3DDevice9::Reset;
+
 	// ok
 	return true;
 
@@ -178,7 +193,11 @@ void TW_CALL wfButton(void *clientData) //wireframe button for AntTweak Bar
     bool* wireframe = static_cast<bool*> (clientData);
 	*wireframe = !*wireframe;
 	}
-
+void TW_CALL saveButton(void *clientData)
+{
+	rtvsD3dApp* applicationPointer = (rtvsD3dApp*)clientData;
+	applicationPointer->saveFile();
+}
 
 
 // ---------- framework : display ----------
@@ -373,27 +392,6 @@ bool rtvsD3dApp::setup ()
 	ifstream ifile;
 
 			//Collects all the data from the config files
-			ifile.open("config/wave0.txt");
-
-			getline(ifile, wav_line1_id);
-			getline(ifile, wav_line2_emX);
-			getline(ifile, wav_line3_emZ);
-			getline(ifile, wav_line4_amp);
-			getline(ifile, wav_line5_prd);
-			getline(ifile, wav_line6_phS);
-			getline(ifile, wav_line7_phI);
-			getline(ifile, wav_line8_Yoff);
-
-			wave[0].id   = ::atoi(wav_line1_id.c_str());
-			wave[0].emX  = ::atof(wav_line2_emX.c_str());
-			wave[0].emZ  = ::atof(wav_line3_emZ.c_str());
-			wave[0].amp  = ::atof(wav_line4_amp.c_str());
-			wave[0].prd  = ::atof(wav_line5_prd.c_str());
-			wave[0].phS  = ::atof(wav_line6_phS.c_str());
-			wave[0].phI  = ::atof(wav_line7_phI.c_str());
-			wave[0].Yoff = ::atof(wav_line8_Yoff.c_str());
-			
-			ifile.close();
 
 			ifile.open("config/wave1.txt");
 
@@ -571,7 +569,6 @@ bool rtvsD3dApp::setup ()
 }
 
 
-
 // ---------- framework : setup dx ----------
 
 /*!
@@ -682,70 +679,71 @@ bool rtvsD3dApp::setupDX (LPDIRECT3DDEVICE9 pd3dDevice)
 	myBar = TwNewBar("Ocean Wave Settings");
 
 	TwAddButton(myBar, "Mode", wfButton, &wireframe, " label='Wireframe' ");
+	TwAddButton(myBar, "SaveF", saveButton, this, " label='Save All' ");
 
-	TwAddVarRW(myBar, "wave1emx", TW_TYPE_FLOAT, &wave[1].emX, " min=-25 max=25 step=0.02 group=Wave-1 label='Emmiter X' ");
-	TwAddVarRW(myBar, "wave1emz", TW_TYPE_FLOAT, &wave[1].emZ, " min=-25 max=25 step=0.02 group=Wave-1 label='Emmiter Z' ");
-	TwAddVarRW(myBar, "wave1amp",TW_TYPE_FLOAT, &wave[1].amp, " min=-3 max=3 step=0.02 group=Wave-1 label='Amplitude' ");
-	TwAddVarRW(myBar, "wave1prd", TW_TYPE_FLOAT, &wave[1].prd, " min=0 max=100 step=0.05 group=Wave-1 label='Period' ");
-	TwAddVarRW(myBar, "wave1phs", TW_TYPE_FLOAT, &wave[1].phS, " min=-5 max=5 step=0.01 group=Wave-1 label='Phase Shift' ");
-	TwAddVarRW(myBar, "wave1phi", TW_TYPE_FLOAT, &wave[1].phI, " min=-360 max=360 step=0.1 group=Wave-1 label='Phase Incr' ");
-	TwAddVarRW(myBar, "wave1yoff", TW_TYPE_FLOAT, &wave[1].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-1 label='Y Offset' ");
+	TwAddVarRW(myBar, "wave1emx", TW_TYPE_FLOAT, &wave[1].emX, " min=-25 max=25 step=0.02 group=Wave-1-(NumKey1) label='Emmiter X' ");
+	TwAddVarRW(myBar, "wave1emz", TW_TYPE_FLOAT, &wave[1].emZ, " min=-25 max=25 step=0.02 group=Wave-1-(NumKey1) label='Emmiter Z' ");
+	TwAddVarRW(myBar, "wave1amp",TW_TYPE_FLOAT, &wave[1].amp, " min=-3 max=3 step=0.02 group=Wave-1-(NumKey1) label='Amplitude' ");
+	TwAddVarRW(myBar, "wave1prd", TW_TYPE_FLOAT, &wave[1].prd, " min=0 max=100 step=0.05 group=Wave-1-(NumKey1) label='Period' ");
+	TwAddVarRW(myBar, "wave1phs", TW_TYPE_FLOAT, &wave[1].phS, " min=-5 max=5 step=0.01 group=Wave-1-(NumKey1) label='Phase Shift' ");
+	TwAddVarRW(myBar, "wave1phi", TW_TYPE_FLOAT, &wave[1].phI, " min=-360 max=360 step=0.1 group=Wave-1-(NumKey1) label='Phase Incr' ");
+	TwAddVarRW(myBar, "wave1yoff", TW_TYPE_FLOAT, &wave[1].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-1-(NumKey1) label='Y Offset' ");
 
-	TwAddVarRW(myBar, "wave2emx", TW_TYPE_FLOAT, &wave[2].emX, " min=-25 max=25 step=0.02 group=Wave-2 label='Emmiter X' ");
-	TwAddVarRW(myBar, "wave2emz", TW_TYPE_FLOAT, &wave[2].emZ, " min=-25 max=25 step=0.02 group=Wave-2 label='Emmiter Z' ");
-	TwAddVarRW(myBar, "wave2amp", TW_TYPE_FLOAT, &wave[2].amp, " min=-3 max=3 step=0.02 group=Wave-2 label='Amplitude' ");
-	TwAddVarRW(myBar, "wave2prd", TW_TYPE_FLOAT, &wave[2].prd, " min=0 max=100 step=0.05 group=Wave-2 label='Period' ");
-	TwAddVarRW(myBar, "wave2phs", TW_TYPE_FLOAT, &wave[2].phS, " min=-5 max=5 step=0.01 group=Wave-2 label='Phase Shift' ");
-	TwAddVarRW(myBar, "wave2psi", TW_TYPE_FLOAT, &wave[2].phI, " min=-360 max=360 step=0.1 group=Wave-2 label='Phase Incr' ");
-	TwAddVarRW(myBar, "wave2yoff", TW_TYPE_FLOAT, &wave[2].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-2 label='Y Offset' ");
+	TwAddVarRW(myBar, "wave2emx", TW_TYPE_FLOAT, &wave[2].emX, " min=-25 max=25 step=0.02 group=Wave-2-(NumKey2) label='Emmiter X' ");
+	TwAddVarRW(myBar, "wave2emz", TW_TYPE_FLOAT, &wave[2].emZ, " min=-25 max=25 step=0.02 group=Wave-2-(NumKey2) label='Emmiter Z' ");
+	TwAddVarRW(myBar, "wave2amp", TW_TYPE_FLOAT, &wave[2].amp, " min=-3 max=3 step=0.02 group=Wave-2-(NumKey2) label='Amplitude' ");
+	TwAddVarRW(myBar, "wave2prd", TW_TYPE_FLOAT, &wave[2].prd, " min=0 max=100 step=0.05 group=Wave-2-(NumKey2) label='Period' ");
+	TwAddVarRW(myBar, "wave2phs", TW_TYPE_FLOAT, &wave[2].phS, " min=-5 max=5 step=0.01 group=Wave-2-(NumKey2) label='Phase Shift' ");
+	TwAddVarRW(myBar, "wave2psi", TW_TYPE_FLOAT, &wave[2].phI, " min=-360 max=360 step=0.1 group=Wave-2-(NumKey2) label='Phase Incr' ");
+	TwAddVarRW(myBar, "wave2yoff", TW_TYPE_FLOAT, &wave[2].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-2-(NumKey2) label='Y Offset' ");
 
-	TwAddVarRW(myBar, "wave3emx", TW_TYPE_FLOAT, &wave[3].emX, " min=-25 max=25 step=0.02 group=Wave-3 label='Emmiter X' ");
-	TwAddVarRW(myBar, "wave3emz", TW_TYPE_FLOAT, &wave[3].emZ, " min=-25 max=25 step=0.02 group=Wave-3 label='Emmiter Z' ");
-	TwAddVarRW(myBar, "wave3amp", TW_TYPE_FLOAT, &wave[3].amp, " min=-3 max=3 step=0.02 group=Wave-3 label='Amplitude' ");
-	TwAddVarRW(myBar, "wave3prd", TW_TYPE_FLOAT, &wave[3].prd, " min=0 max=100 step=0.05 group=Wave-3 label='Period' ");
-	TwAddVarRW(myBar, "wave4phs", TW_TYPE_FLOAT, &wave[3].phS, " min=-5 max=5 step=0.01 group=Wave-3 label='Phase Shift' ");
-	TwAddVarRW(myBar, "wave4phi", TW_TYPE_FLOAT, &wave[3].phI, " min=-360 max=360 step=0.1 group=Wave-3 label='Phase Incr' ");
-	TwAddVarRW(myBar, "wave4yoff", TW_TYPE_FLOAT, &wave[3].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-3 label='Y Offset' ");
+	TwAddVarRW(myBar, "wave3emx", TW_TYPE_FLOAT, &wave[3].emX, " min=-25 max=25 step=0.02 group=Wave-3-(NumKey3) label='Emmiter X' ");
+	TwAddVarRW(myBar, "wave3emz", TW_TYPE_FLOAT, &wave[3].emZ, " min=-25 max=25 step=0.02 group=Wave-3-(NumKey3) label='Emmiter Z' ");
+	TwAddVarRW(myBar, "wave3amp", TW_TYPE_FLOAT, &wave[3].amp, " min=-3 max=3 step=0.02 group=Wave-3-(NumKey3) label='Amplitude' ");
+	TwAddVarRW(myBar, "wave3prd", TW_TYPE_FLOAT, &wave[3].prd, " min=0 max=100 step=0.05 group=Wave-3-(NumKey3) label='Period' ");
+	TwAddVarRW(myBar, "wave4phs", TW_TYPE_FLOAT, &wave[3].phS, " min=-5 max=5 step=0.01 group=Wave-3-(NumKey3) label='Phase Shift' ");
+	TwAddVarRW(myBar, "wave4phi", TW_TYPE_FLOAT, &wave[3].phI, " min=-360 max=360 step=0.1 group=Wave-3-(NumKey3) label='Phase Incr' ");
+	TwAddVarRW(myBar, "wave4yoff", TW_TYPE_FLOAT, &wave[3].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-3-(NumKey3) label='Y Offset' ");
 
-	TwAddVarRW(myBar, "wave4emx", TW_TYPE_FLOAT, &wave[4].emX, " min=-25 max=25 step=0.02 group=Wave-4 label='Emmiter X' ");
-	TwAddVarRW(myBar, "wave4emz", TW_TYPE_FLOAT, &wave[4].emZ, " min=-25 max=25 step=0.02 group=Wave-4 label='Emmiter Z' ");
-	TwAddVarRW(myBar, "wave4amp", TW_TYPE_FLOAT, &wave[4].amp, " min=-3 max=3 step=0.02 group=Wave-4 label='Amplitude' ");
-	TwAddVarRW(myBar, "wave4prd", TW_TYPE_FLOAT, &wave[4].prd, " min=0 max=100 step=0.05 group=Wave-4 label='Period' ");
-	TwAddVarRW(myBar, "wave4phs", TW_TYPE_FLOAT, &wave[4].phS, " min=-5 max=5 step=0.01 group=Wave-4 label='Phase Shift' ");
-	TwAddVarRW(myBar, "wave4phi", TW_TYPE_FLOAT, &wave[4].phI, " min=-360 max=360 step=0.1 group=Wave-4 label='Phase Incr' ");
-	TwAddVarRW(myBar, "wave4yoff", TW_TYPE_FLOAT, &wave[4].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-4 label='Y Offset' ");
+	TwAddVarRW(myBar, "wave4emx", TW_TYPE_FLOAT, &wave[4].emX, " min=-25 max=25 step=0.02 group=Wave-4-(NumKey4) label='Emmiter X' ");
+	TwAddVarRW(myBar, "wave4emz", TW_TYPE_FLOAT, &wave[4].emZ, " min=-25 max=25 step=0.02 group=Wave-4-(NumKey4) label='Emmiter Z' ");
+	TwAddVarRW(myBar, "wave4amp", TW_TYPE_FLOAT, &wave[4].amp, " min=-3 max=3 step=0.02 group=Wave-4-(NumKey4) label='Amplitude' ");
+	TwAddVarRW(myBar, "wave4prd", TW_TYPE_FLOAT, &wave[4].prd, " min=0 max=100 step=0.05 group=Wave-4-(NumKey4) label='Period' ");
+	TwAddVarRW(myBar, "wave4phs", TW_TYPE_FLOAT, &wave[4].phS, " min=-5 max=5 step=0.01 group=Wave-4-(NumKey4) label='Phase Shift' ");
+	TwAddVarRW(myBar, "wave4phi", TW_TYPE_FLOAT, &wave[4].phI, " min=-360 max=360 step=0.1 group=Wave-4-(NumKey4) label='Phase Incr' ");
+	TwAddVarRW(myBar, "wave4yoff", TW_TYPE_FLOAT, &wave[4].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-4-(NumKey4) label='Y Offset' ");
 
-	TwAddVarRW(myBar, "wave5emx", TW_TYPE_FLOAT, &wave[5].emX, " min=-25 max=25 step=0.02 group=Wave-5 label='Emmiter X' ");
-	TwAddVarRW(myBar, "wave5emz", TW_TYPE_FLOAT, &wave[5].emZ, " min=-25 max=25 step=0.02 group=Wave-5 label='Emmiter Z' ");
-	TwAddVarRW(myBar, "wave5amp", TW_TYPE_FLOAT, &wave[5].amp, " min=-3 max=3 step=0.02 group=Wave-5 label='Amplitude' ");
-	TwAddVarRW(myBar, "wave5prd", TW_TYPE_FLOAT, &wave[5].prd, " min=0 max=100 step=0.05 group=Wave-5 label='Period' ");
-	TwAddVarRW(myBar, "wave5phs", TW_TYPE_FLOAT, &wave[5].phS, " min=-5 max=5 step=0.01 group=Wave-5 label='Phase Shift' ");
-	TwAddVarRW(myBar, "wave5phi", TW_TYPE_FLOAT, &wave[5].phI, " min=-360 max=360 step=0.1 group=Wave-5 label='Phase Incr' ");
-	TwAddVarRW(myBar, "wave5yoff", TW_TYPE_FLOAT, &wave[5].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-5 label='Y Offset' ");
+	TwAddVarRW(myBar, "wave5emx", TW_TYPE_FLOAT, &wave[5].emX, " min=-25 max=25 step=0.02 group=Wave-5-(NumKey5) label='Emmiter X' ");
+	TwAddVarRW(myBar, "wave5emz", TW_TYPE_FLOAT, &wave[5].emZ, " min=-25 max=25 step=0.02 group=Wave-5-(NumKey5) label='Emmiter Z' ");
+	TwAddVarRW(myBar, "wave5amp", TW_TYPE_FLOAT, &wave[5].amp, " min=-3 max=3 step=0.02 group=Wave-5-(NumKey5) label='Amplitude' ");
+	TwAddVarRW(myBar, "wave5prd", TW_TYPE_FLOAT, &wave[5].prd, " min=0 max=100 step=0.05 group=Wave-5-(NumKey5) label='Period' ");
+	TwAddVarRW(myBar, "wave5phs", TW_TYPE_FLOAT, &wave[5].phS, " min=-5 max=5 step=0.01 group=Wave-5-(NumKey5) label='Phase Shift' ");
+	TwAddVarRW(myBar, "wave5phi", TW_TYPE_FLOAT, &wave[5].phI, " min=-360 max=360 step=0.1 group=Wave-5-(NumKey5) label='Phase Incr' ");
+	TwAddVarRW(myBar, "wave5yoff", TW_TYPE_FLOAT, &wave[5].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-5-(NumKey5) label='Y Offset' ");
 
-	TwAddVarRW(myBar, "wave6emx", TW_TYPE_FLOAT, &wave[6].emX, " min=-25 max=25 step=0.02 group=Wave-6 label='Emmiter X' ");
-	TwAddVarRW(myBar, "wave6emz", TW_TYPE_FLOAT, &wave[6].emZ, " min=-25 max=25 step=0.02 group=Wave-6 label='Emmiter Z' ");
-	TwAddVarRW(myBar, "wave6amp", TW_TYPE_FLOAT, &wave[6].amp, " min=-3 max=3 step=0.02 group=Wave-6 label='Amplitude' ");
-	TwAddVarRW(myBar, "wave6prd", TW_TYPE_FLOAT, &wave[6].prd, " min=0 max=100 step=0.05 group=Wave-6 label='Period' ");
-	TwAddVarRW(myBar, "wave6phs", TW_TYPE_FLOAT, &wave[6].phS, " min=-5 max=5 step=0.01 group=Wave-6 label='Phase Shift' ");
-	TwAddVarRW(myBar, "wave6phi", TW_TYPE_FLOAT, &wave[6].phI, " min=-360 max=360 step=0.1 group=Wave-6 label='Phase Incr' ");
-	TwAddVarRW(myBar, "wave6yoff", TW_TYPE_FLOAT, &wave[6].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-6 label='Y Offset' ");
+	TwAddVarRW(myBar, "wave6emx", TW_TYPE_FLOAT, &wave[6].emX, " min=-25 max=25 step=0.02 group=Wave-6-(NumKey6) label='Emmiter X' ");
+	TwAddVarRW(myBar, "wave6emz", TW_TYPE_FLOAT, &wave[6].emZ, " min=-25 max=25 step=0.02 group=Wave-6-(NumKey6) label='Emmiter Z' ");
+	TwAddVarRW(myBar, "wave6amp", TW_TYPE_FLOAT, &wave[6].amp, " min=-3 max=3 step=0.02 group=Wave-6-(NumKey6) label='Amplitude' ");
+	TwAddVarRW(myBar, "wave6prd", TW_TYPE_FLOAT, &wave[6].prd, " min=0 max=100 step=0.05 group=Wave-6-(NumKey6) label='Period' ");
+	TwAddVarRW(myBar, "wave6phs", TW_TYPE_FLOAT, &wave[6].phS, " min=-5 max=5 step=0.01 group=Wave-6-(NumKey6) label='Phase Shift' ");
+	TwAddVarRW(myBar, "wave6phi", TW_TYPE_FLOAT, &wave[6].phI, " min=-360 max=360 step=0.1 group=Wave-6-(NumKey6) label='Phase Incr' ");
+	TwAddVarRW(myBar, "wave6yoff", TW_TYPE_FLOAT, &wave[6].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-6-(NumKey6) label='Y Offset' ");
 
-	TwAddVarRW(myBar, "wave7emx", TW_TYPE_FLOAT, &wave[7].emX, " min=-25 max=25 step=0.02 group=Wave-7 label='Emmiter X' ");
-	TwAddVarRW(myBar, "wave7emz", TW_TYPE_FLOAT, &wave[7].emZ, " min=-25 max=25 step=0.02 group=Wave-7 label='Emmiter Z' ");
-	TwAddVarRW(myBar, "wave7amp", TW_TYPE_FLOAT, &wave[7].amp, " min=-3 max=3 step=0.02 group=Wave-7 label='Amplitude' ");
-	TwAddVarRW(myBar, "wave7prd", TW_TYPE_FLOAT, &wave[7].prd, " min=0 max=100 step=0.05 group=Wave-7 label='Period' ");
-	TwAddVarRW(myBar, "wave7phs", TW_TYPE_FLOAT, &wave[7].phS, " min=-5 max=5 step=0.01 group=Wave-7 label='Phase Shift' ");
-	TwAddVarRW(myBar, "wave7phi", TW_TYPE_FLOAT, &wave[7].phI, " min=-360 max=360 step=0.1 group=Wave-7 label='Phase Incr' ");
-	TwAddVarRW(myBar, "wave7yoff", TW_TYPE_FLOAT, &wave[7].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-7 label='Y Offset' ");
+	TwAddVarRW(myBar, "wave7emx", TW_TYPE_FLOAT, &wave[7].emX, " min=-25 max=25 step=0.02 group=Wave-7-(NumKey7) label='Emmiter X' ");
+	TwAddVarRW(myBar, "wave7emz", TW_TYPE_FLOAT, &wave[7].emZ, " min=-25 max=25 step=0.02 group=Wave-7-(NumKey7) label='Emmiter Z' ");
+	TwAddVarRW(myBar, "wave7amp", TW_TYPE_FLOAT, &wave[7].amp, " min=-3 max=3 step=0.02 group=Wave-7-(NumKey7) label='Amplitude' ");
+	TwAddVarRW(myBar, "wave7prd", TW_TYPE_FLOAT, &wave[7].prd, " min=0 max=100 step=0.05 group=Wave-7-(NumKey7) label='Period' ");
+	TwAddVarRW(myBar, "wave7phs", TW_TYPE_FLOAT, &wave[7].phS, " min=-5 max=5 step=0.01 group=Wave-7-(NumKey7) label='Phase Shift' ");
+	TwAddVarRW(myBar, "wave7phi", TW_TYPE_FLOAT, &wave[7].phI, " min=-360 max=360 step=0.1 group=Wave-7-(NumKey7) label='Phase Incr' ");
+	TwAddVarRW(myBar, "wave7yoff", TW_TYPE_FLOAT, &wave[7].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-7-(NumKey7) label='Y Offset' ");
 
-	TwAddVarRW(myBar, "wave8emx", TW_TYPE_FLOAT, &wave[8].emX, " min=-25 max=25 step=0.02 group=Wave-8 label='Emmiter X' ");
-	TwAddVarRW(myBar, "wave8emz", TW_TYPE_FLOAT, &wave[8].emZ, " min=-25 max=25 step=0.02 group=Wave-8 label='Emmiter Z' ");
-	TwAddVarRW(myBar, "wave8amp", TW_TYPE_FLOAT, &wave[8].amp, " min=-3 max=3 step=0.02 group=Wave-8 label='Amplitude' ");
-	TwAddVarRW(myBar, "wave8prd", TW_TYPE_FLOAT, &wave[8].prd, " min=0 max=100 step=0.05 group=Wave-8 label='Period' ");
-	TwAddVarRW(myBar, "wave8phs", TW_TYPE_FLOAT, &wave[8].phS, " min=-5 max=5 step=0.01 group=Wave-8 label='Phase Shift' ");
-	TwAddVarRW(myBar, "wave8phi", TW_TYPE_FLOAT, &wave[8].phI, " min=-360 max=360 step=0.1 group=Wave-8 label='Phase Incr' ");
-	TwAddVarRW(myBar, "wave8yoff", TW_TYPE_FLOAT, &wave[8].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-8 label='Y Offset' ");
+	TwAddVarRW(myBar, "wave8emx", TW_TYPE_FLOAT, &wave[8].emX, " min=-25 max=25 step=0.02 group=Wave-8-(NumKey8) label='Emmiter X' ");
+	TwAddVarRW(myBar, "wave8emz", TW_TYPE_FLOAT, &wave[8].emZ, " min=-25 max=25 step=0.02 group=Wave-8-(NumKey8) label='Emmiter Z' ");
+	TwAddVarRW(myBar, "wave8amp", TW_TYPE_FLOAT, &wave[8].amp, " min=-3 max=3 step=0.02 group=Wave-8-(NumKey8) label='Amplitude' ");
+	TwAddVarRW(myBar, "wave8prd", TW_TYPE_FLOAT, &wave[8].prd, " min=0 max=100 step=0.05 group=Wave-8-(NumKey8) label='Period' ");
+	TwAddVarRW(myBar, "wave8phs", TW_TYPE_FLOAT, &wave[8].phS, " min=-5 max=5 step=0.01 group=Wave-8-(NumKey8) label='Phase Shift' ");
+	TwAddVarRW(myBar, "wave8phi", TW_TYPE_FLOAT, &wave[8].phI, " min=-360 max=360 step=0.1 group=Wave-8-(NumKey8) label='Phase Incr' ");
+	TwAddVarRW(myBar, "wave8yoff", TW_TYPE_FLOAT, &wave[8].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-8-(NumKey8) label='Y Offset' ");
 	
 	
 
@@ -1047,9 +1045,38 @@ void rtvsD3dApp::meshNormal (
 
 }
 
+bool rtvsD3dApp::saveFile() {
+
+	ofstream oFile;
+
+	oFile.open("config/wave1.txt");
+	oFile <<  wave[1].id << "\n" << wave[1].emX << "\n" << wave[1].emZ << "\n" << wave[1].amp << "\n" << wave[1].prd << "\n" << wave[1].phS << "\n" << wave[1].phI << "\n" << wave[1].Yoff;
+	oFile.close();
+	oFile.open("config/wave2.txt");
+	oFile <<  wave[2].id << "\n" << wave[2].emX << "\n" << wave[2].emZ << "\n" << wave[2].amp << "\n" << wave[2].prd << "\n" << wave[2].phS << "\n" << wave[2].phI << "\n" << wave[2].Yoff;
+	oFile.close();
+	oFile.open("config/wave3.txt");
+	oFile <<  wave[3].id << "\n" << wave[3].emX << "\n" << wave[3].emZ << "\n" << wave[3].amp << "\n" << wave[3].prd << "\n" << wave[3].phS << "\n" << wave[3].phI << "\n" << wave[3].Yoff;
+	oFile.close();
+	oFile.open("config/wave4.txt");
+	oFile <<  wave[4].id << "\n" << wave[4].emX << "\n" << wave[4].emZ << "\n" << wave[4].amp << "\n" << wave[4].prd << "\n" << wave[4].phS << "\n" << wave[4].phI << "\n" << wave[4].Yoff;
+	oFile.close();
+	oFile.open("config/wave5.txt");
+	oFile <<  wave[5].id << "\n" << wave[5].emX << "\n" << wave[5].emZ << "\n" << wave[5].amp << "\n" << wave[5].prd << "\n" << wave[5].phS << "\n" << wave[5].phI << "\n" << wave[5].Yoff;
+	oFile.close();
+	oFile.open("config/wave6.txt");
+	oFile <<  wave[6].id << "\n" << wave[6].emX << "\n" << wave[6].emZ << "\n" << wave[6].amp << "\n" << wave[6].prd << "\n" << wave[6].phS << "\n" << wave[6].phI << "\n" << wave[6].Yoff;
+	oFile.close();
+	oFile.open("config/wave7.txt");
+	oFile <<  wave[7].id << "\n" << wave[7].emX << "\n" << wave[7].emZ << "\n" << wave[7].amp << "\n" << wave[7].prd << "\n" << wave[7].phS << "\n" << wave[7].phI << "\n" << wave[7].Yoff;
+	oFile.close();
+	oFile.open("config/wave8.txt");
+	oFile <<  wave[8].id << "\n" << wave[8].emX << "\n" << wave[8].emZ << "\n" << wave[8].amp << "\n" << wave[8].prd << "\n" << wave[8].phS << "\n" << wave[8].phI << "\n" << wave[8].Yoff;
+	oFile.close();
 
 
-
+	return true;
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////

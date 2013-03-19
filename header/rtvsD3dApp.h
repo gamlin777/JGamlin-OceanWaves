@@ -159,7 +159,7 @@ public:
 
 	float frame;
 	bool wireframe;
-
+	bool saveFile();
 	
 
 		struct waveFile {
