@@ -133,12 +133,40 @@ bool rtvsD3dApp::cleanupDX (LPDIRECT3DDEVICE9 pd3dDevice)
         pFont = NULL;
 		
     }
+	 if( pVertexBuffer != NULL )
+    {
+        int nNewRefCount = pVertexBuffer->Release();
 
+        if( nNewRefCount > 0 )
+        {
+            static char strError[256];
+            sprintf_s ( strError, 256,
+				"The line vertex buffer object failed to cleanup properly.\n"
+                "Release() returned a reference count of %d",
+				nNewRefCount );
+            MessageBox( NULL, strError, "ERROR", MB_OK | MB_ICONEXCLAMATION );
+        }
+        pVertexBuffer = NULL;
+    }
+
+	  if( pMesh != NULL )
+    {
+        int nNewRefCount = pMesh->Release();
+
+        if( nNewRefCount > 0 )
+        {
+            static char strError[256];
+            sprintf_s ( strError, 256,
+				"The line vertex buffer object failed to cleanup properly.\n"
+                "Release() returned a reference count of %d",
+				nNewRefCount );
+            MessageBox( NULL, strError, "ERROR", MB_OK | MB_ICONEXCLAMATION );
+        }
+        pMesh = NULL;
+    }
 	//Cleanup 
 	TwTerminate();//cleanup anttweakbar
 	waveTexture->Release();
-	pVertexBuffer->Release();
-	pMesh->Release();
 	&IDirect3DDevice9::Reset;
 	// ok
 	return true;
