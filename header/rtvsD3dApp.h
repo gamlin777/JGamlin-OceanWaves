@@ -191,7 +191,12 @@ public:
 
 		bool waveEnabled[9];
 
+		//skybox vars
+	LPDIRECT3DTEXTURE9			skyTextures[6];
+	LPDIRECT3DVERTEXBUFFER9		sky_pVertexBuffer;
+	
 
+bool makeSkybox(LPDIRECT3DDEVICE9);
 	
 
 };
