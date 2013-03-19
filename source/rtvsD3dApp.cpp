@@ -185,14 +185,10 @@ bool rtvsD3dApp::cleanupDX (LPDIRECT3DDEVICE9 pd3dDevice)
 
 	// Cleanup Skybox (cleanupDX)
 	for(unsigned int i=0; i<6; ++i){
-		//textures
-		if( skyTextures[i] != NULL )
-		{
+		if(skyBoxPanels[i] != NULL){
+		int nNewRefCount = skyBoxPanels[i]->Release();
 
-			int nNewRefCount = skyTextures[i]->Release();
-
-			if( nNewRefCount > 0 )
-			{
+			if(nNewRefCount > 0){
 				static char strError[256];
 				sprintf_s ( strError, 256,
 					"The skybox textures failed to cleanup properly.\n"
@@ -200,17 +196,14 @@ bool rtvsD3dApp::cleanupDX (LPDIRECT3DDEVICE9 pd3dDevice)
 					nNewRefCount );
 				MessageBox( NULL, strError, "ERROR", MB_OK | MB_ICONEXCLAMATION );
 			}
-
-			skyTextures[i] = NULL;
+			skyBoxPanels[i] = NULL;
 		}
 	}
 //vertices
-	if( sky_pVertexBuffer != NULL )
-	{
+	if(sky_pVertexBuffer != NULL){
 		int nNewRefCount = sky_pVertexBuffer->Release();
 
-		if( nNewRefCount > 0 )
-			{
+		if(nNewRefCount > 0){
 				static char strError[256];
 				sprintf_s ( strError, 256,
 					"The skybox vertex buffer failed to cleanup properly.\n"
@@ -228,7 +221,7 @@ bool rtvsD3dApp::cleanupDX (LPDIRECT3DDEVICE9 pd3dDevice)
 
 }
 
-void TW_CALL wfButton(void *clientData) //wireframe button for AntTweak Bar
+void TW_CALL wfButton(void *clientData) // buttons for AntTweak Bar
 	{ 
     bool* wireframe = static_cast<bool*> (clientData);
 	*wireframe = !*wireframe;
@@ -315,11 +308,9 @@ bool rtvsD3dApp::display (LPDIRECT3DDEVICE9 pd3dDevice)
 	//pd3dDevice->SetRenderState( D3DRS_ZWRITEENABLE, false );
 	//pd3dDevice->SetRenderState( D3DRS_LIGHTING, false );
 	pd3dDevice->SetFVF( D3DFVF_XYZ |  D3DFVF_TEX1);
-	for (int i=0; i<6; ++i){
-        pd3dDevice->SetTexture( 0, skyTextures[i] );
-
-		//render face
-		pd3dDevice->DrawPrimitive( D3DPT_TRIANGLESTRIP, i * 4, 2 );
+	for (int i=0; i<6; i++){
+        pd3dDevice->SetTexture(0, skyBoxPanels[i]);
+		pd3dDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, i * 4, 2);
     }
 	
 	// locate
@@ -327,10 +318,8 @@ bool rtvsD3dApp::display (LPDIRECT3DDEVICE9 pd3dDevice)
 	matWorld = matRotation * matTranslation;
 	pd3dDevice->SetTransform( D3DTS_WORLD, &matWorld );
 
-	
-
 	// mesh
-	if (wireframe == true) {
+	if (wireframe == true) { //for wireframe mode TW
 	pd3dDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
 	} else { 
 		
@@ -341,16 +330,10 @@ bool rtvsD3dApp::display (LPDIRECT3DDEVICE9 pd3dDevice)
 	}
 	
 	frame++;
-	meshUpdateY(frame);							//frame increments thus the function does
+	meshUpdateY(frame);	//frame increments thus the function does
 	pMesh->DrawSubset(0); //draw mesh
 
-	
-
-	/*for (int i = 0; i < faces; i++)
-		meshNormal(vertices */
-	
-	
-	TwDraw();  // draw the tweak bar(s)
+	TwDraw();  // draw the tweak bar GUI
 	// ok
 	return true;
 
@@ -415,14 +398,7 @@ bool rtvsD3dApp::setup ()
     backLight.Specular.b = 0.3f;
     backLight.Specular.a = 1.0f;
 
-	/*sineWaveParameters[0] = 0.0;
-	sineWaveParameters[1] = 0.0;
-	sineWaveParameters[2] = 1.0;
-	sineWaveParameters[3] = 90.0;
-	sineWaveParameters[4] = 0.5;
-	sineWaveParameters[5] = 0.5;
-	sineWaveParameters[6] = 0.0;*/
-	
+	//display setup
 	frame = 0;
 	wireframe = false;
 	
@@ -803,8 +779,8 @@ bool rtvsD3dApp::setupDX (LPDIRECT3DDEVICE9 pd3dDevice)
 	TwAddVarRW(myBar, "wave8phi", TW_TYPE_FLOAT, &wave[8].phI, " min=-360 max=360 step=0.1 group=Wave-8-(NumKey8) label='Phase Incr' ");
 	TwAddVarRW(myBar, "wave8yoff", TW_TYPE_FLOAT, &wave[8].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-8-(NumKey8) label='Y Offset' ");
 	
-	//make skybox (setupDX)
-	makeSkybox(pd3dDevice);
+	//construct the skybox
+	Skybox(pd3dDevice);
 
 
 	return true;
@@ -1014,11 +990,10 @@ bool rtvsD3dApp::meshUpdateY (float step)
     // for each vertex
 	int rowVerts = 100; //vertices per row
 
-    for (DWORD v=0; v<vertices; v++)
-    {
+    for (DWORD v=0; v<vertices; v++)  { //for each vertex
 		pVertexData->y = 0;
 		int enable = 0;
-		for (int i = 0; i < 9; i++) {
+		for (int i = 0; i < 9; i++) { //applies a sine wave to each
 			if(waveEnabled[i]){
 				// wave
 				float xd = pVertexData->x - wave[i].emX;
@@ -1030,12 +1005,12 @@ bool rtvsD3dApp::meshUpdateY (float step)
 		}
 		pVertexData->y /= enable;
 
-		//normal calculation
+		//normal calculation for lighting when going through each vertex on the mesh
 		if (v%rowVerts==rowVerts-1){
 			meshNormal(pVertexData-1, pVertexData+(rowVerts-+1), pVertexData+rowVerts, pVertexData);
-		} else if (v>=vertices-vtxRows){
+		}else if (v>=vertices-vtxRows){
 			meshNormal(pVertexData-1, pVertexData-(rowVerts-+1), pVertexData-rowVerts, pVertexData);
-		} else {
+		}else{
 			meshNormal(pVertexData+1, pVertexData+(rowVerts+1), pVertexData+rowVerts, pVertexData);
 		}
 
@@ -1104,8 +1079,10 @@ void rtvsD3dApp::meshNormal (
 
 }
 
+//Save All function
 bool rtvsD3dApp::saveFile() {
 
+	
 	ofstream oFile;
 
 	oFile.open("config/wave1.txt");
@@ -1155,43 +1132,43 @@ bool rtvsD3dApp::saveFile() {
 */
 
 
-// buildskybox
-bool rtvsD3dApp::makeSkybox(LPDIRECT3DDEVICE9 device)
+// Skybox
+bool rtvsD3dApp::Skybox(LPDIRECT3DDEVICE9 device)
 {
 
 	meshVertex g_SkyboxMesh[24] =
 	{
-		// Front face
+		//front
 		{-20.0f, -20.0f,  20.0f,  0.0f, 1.0f },
 		{-20.0f,  20.0f, 20.0f,  0.0f, 0.0f },
 		{ 20.0f, -20.0f,  20.0f,  1.0f, 1.0f },
 		{ 20.0f,  20.0f,  20.0f,  1.0f, 0.0f },
 
-		// Back face
+		//back
 		{ 20.0f, -20.0f, -20.0f,  0.0f, 1.0f },
 		{ 20.0f,  20.0f, -20.0f,  0.0f, 0.0f },
 		{-20.0f, -20.0f, -20.0f,  1.0f, 1.0f },
 		{-20.0f,  20.0f, -20.0f,  1.0f, 0.0f },
 
-		// Left face
+		//left
 		{-20.0f, -20.0f, -20.0f,  0.0f, 1.0f },
 		{-20.0f,  20.0f, -20.0f,  0.0f, 0.0f },
 		{-20.0f, -20.0f,  20.0f,  1.0f, 1.0f },
 		{-20.0f,  20.0f,  20.0f,  1.0f, 0.0f },
 
-		// Right face
+		//right
 		{ 20.0f, -20.0f,  20.0f,  0.0f, 1.0f },
 		{ 20.0f,  20.0f,  20.0f,  0.0f, 0.0f },
 		{ 20.0f, -20.0f, -20.0f,  1.0f, 1.0f },
 		{ 20.0f,  20.0f, -20.0f,  1.0f, 0.0f },
 
-		// Top face
+		//top
 		{-20.0f,  20.0f,  20.0f,  0.0f, 1.0f },
 		{-20.0f,  20.0f, -20.0f,  0.0f, 0.0f },
 		{ 20.0f,  20.0f,  20.0f,  1.0f, 1.0f },
 		{ 20.0f,  20.0f, -20.0f,  1.0f, 0.0f },
 
-		// Bottom face
+		//bottom
 		{-20.0f, -20.0f, -20.0f,  0.0f, 1.0f },
 		{-20.0f, -20.0f,  20.0f,  0.0f, 0.0f },
 		{ 20.0f, -20.0f, -20.0f,  1.0f, 1.0f },
@@ -1200,36 +1177,26 @@ bool rtvsD3dApp::makeSkybox(LPDIRECT3DDEVICE9 device)
 
 	HRESULT hr;
 
-	// Create our vertex buffer ( 24 vertices (4 verts * 6 faces) )
+	//vertex buffer for skybox (24 verts)
 	hr = device->CreateVertexBuffer( sizeof(meshVertex) * 24,
 		0,							
 		D3DFVF_XYZ |  D3DFVF_TEX1,	
 		D3DPOOL_MANAGED,
 		&sky_pVertexBuffer,	
 		NULL );	
-	if ( FAILED( hr ) )
-	{
-		::MessageBox(NULL, "Error initialising skybox vertices!", "makeSkybox() error", MB_OK | MB_ICONSTOP);
-		return false;
-	}
 
 	void *pVertices = NULL;
 
-	// Copy the skybox mesh into the vertex buffer.  I initialized the whole mesh array
-	// above in global space.
 	sky_pVertexBuffer->Lock( 0, sizeof(meshVertex) * 24, (void**)&pVertices, 0 );
 	memcpy( pVertices, g_SkyboxMesh, sizeof(meshVertex) * 24 );
 	sky_pVertexBuffer->Unlock();
 
-	// Load Textures.  I created a global array just to keep things simple.  The order of the images
-	// is VERY important.  The reason is the skybox mesh (g_SkyboxMesh[]) array was created above
-	// in this order. (ie. front, back, left, etc.)
-	D3DXCreateTextureFromFile( device, ("image/SkyFront.png"), &skyTextures[0] );
-	D3DXCreateTextureFromFile( device, ("image/SkyBack.png"), &skyTextures[1] );
-	D3DXCreateTextureFromFile( device, ("image/SkyLeft.png"), &skyTextures[2] );
-	D3DXCreateTextureFromFile( device, ("image/SkyRight.png"), &skyTextures[3] );
-	D3DXCreateTextureFromFile( device, ("image/SkyTop.png"), &skyTextures[4] );
-	D3DXCreateTextureFromFile( device, ("image/SkyBottom.png"), &skyTextures[5] );
+	D3DXCreateTextureFromFile( device, ("image/SkyFront.png"), &skyBoxPanels[0] );
+	D3DXCreateTextureFromFile( device, ("image/SkyBack.png"), &skyBoxPanels[1] );
+	D3DXCreateTextureFromFile( device, ("image/SkyLeft.png"), &skyBoxPanels[2] );
+	D3DXCreateTextureFromFile( device, ("image/SkyRight.png"), &skyBoxPanels[3] );
+	D3DXCreateTextureFromFile( device, ("image/SkyTop.png"), &skyBoxPanels[4] );
+	D3DXCreateTextureFromFile( device, ("image/SkyBottom.png"), &skyBoxPanels[5] );
 
 	return true;
 }

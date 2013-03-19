@@ -176,7 +176,7 @@ public:
     };
 };
 
-		struct waveFile {
+		struct waveFile { //for each wave
 				int   id;
 				float emX;
 				float emZ;
@@ -191,12 +191,14 @@ public:
 
 		bool waveEnabled[9];
 
-		//skybox vars
-	LPDIRECT3DTEXTURE9			skyTextures[6];
-	LPDIRECT3DVERTEXBUFFER9		sky_pVertexBuffer;
+//skybox
+	 LPDIRECT3DVERTEXBUFFER9  sky_pVertexBuffer;
+		
+		LPDIRECT3DTEXTURE9  skyBoxPanels[6];
+	
 	
 
-bool makeSkybox(LPDIRECT3DDEVICE9);
+bool Skybox(LPDIRECT3DDEVICE9);
 	
 
 };
