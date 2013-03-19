@@ -139,11 +139,17 @@ bool rtvsD3dApp::cleanupDX (LPDIRECT3DDEVICE9 pd3dDevice)
 	waveTexture->Release();
 	pVertexBuffer->Release();
 	pMesh->Release();
+	&IDirect3DDevice9::Reset;
 	// ok
 	return true;
 
 }
 
+void TW_CALL wfButton(void *clientData) //wireframe button for AntTweak Bar
+	{ 
+    bool* wireframe = static_cast<bool*> (clientData);
+	*wireframe = !*wireframe;
+	}
 
 
 
@@ -162,6 +168,20 @@ bool rtvsD3dApp::cleanupDX (LPDIRECT3DDEVICE9 pd3dDevice)
 
 bool rtvsD3dApp::display (LPDIRECT3DDEVICE9 pd3dDevice)
 {
+	//check keyboard input
+	updateKeyboard();
+	for(int i=0; i<9; i++){
+		if(i == currentKeyClicked){
+			waveEnabled[i] = true;
+		} else {
+			waveEnabled[i] = false;
+		}
+	}
+	if(currentKeyClicked == 9){
+		for(int i=0; i<9; i++){
+			waveEnabled[i] = true;
+		}
+	}
 
  	// clear backbuffers
     pd3dDevice->Clear( 0,
@@ -215,17 +235,17 @@ bool rtvsD3dApp::display (LPDIRECT3DDEVICE9 pd3dDevice)
 			pd3dDevice->SetTexture( 0, waveTexture );
 			pd3dDevice->SetFVF( QuadVertex::FVF_Flags );
 			pd3dDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
-			pd3dDevice->SetTexture(0, waveTexture);
 	}
 	
 	frame++;
-	meshUpdateY(sineWaveParameters, frame);							//frame increments thus the function does
+	meshUpdateY(frame);							//frame increments thus the function does
 	pMesh->DrawSubset(0); //draw mesh
 
 	TwDraw();  // draw the tweak bar(s)
 
 	/*for (int i = 0; i < faces; i++)
 		meshNormal(vertices */
+
 
 	// ok
 	return true;
@@ -291,13 +311,13 @@ bool rtvsD3dApp::setup ()
     backLight.Specular.b = 0.3f;
     backLight.Specular.a = 1.0f;
 
-	sineWaveParameters[0] = 0;
-	sineWaveParameters[1] = 0;
-	sineWaveParameters[2] = 1;
-	sineWaveParameters[3] = 90;
+	/*sineWaveParameters[0] = 0.0;
+	sineWaveParameters[1] = 0.0;
+	sineWaveParameters[2] = 1.0;
+	sineWaveParameters[3] = 90.0;
 	sineWaveParameters[4] = 0.5;
 	sineWaveParameters[5] = 0.5;
-	sineWaveParameters[6] = 0;
+	sineWaveParameters[6] = 0.0;*/
 	
 	frame = 0;
 	wireframe = false;
@@ -305,19 +325,6 @@ bool rtvsD3dApp::setup ()
 	
 	//File Manager
 	int currentWave;
-
-	struct waveFile {
-				int   id;
-				float emX;
-				float emZ;
-				float amp;
-				float prd;
-				float phS;
-				float phI;
-				float Yoff;
-			};
-
-	waveFile wave[9];
 
 	string wav_line1_id;
 	string wav_line2_emX;
@@ -328,7 +335,10 @@ bool rtvsD3dApp::setup ()
 	string wav_line7_phI;
 	string wav_line8_Yoff;
 
-	
+	for(int i=0; i<9; i++){
+		waveEnabled[i] = false;
+	}
+	waveEnabled[9] = true;
 
 	// Collects all the data from the config files
 
@@ -419,8 +429,6 @@ bool rtvsD3dApp::setup ()
 			wave[3].phI  = ::atof(wav_line7_phI.c_str());
 			wave[3].Yoff = ::atof(wav_line8_Yoff.c_str());
 
-			
-			
 			ifile.close();
 			ifile.open("config/wave4.txt");
 
@@ -529,18 +537,11 @@ bool rtvsD3dApp::setup ()
 			ifile.close();
 
 
-			
-
 	// ok
 	return true;
 
 }
 
-void TW_CALL wfButton(void *clientData) //wireframe button
-	{ 
-    bool* wireframe = static_cast<bool*> (clientData);
-	*wireframe = !*wireframe;
-	}
 
 
 // ---------- framework : setup dx ----------
@@ -648,18 +649,77 @@ bool rtvsD3dApp::setupDX (LPDIRECT3DDEVICE9 pd3dDevice)
 	//anttweakbar
 	TwInit(TW_DIRECT3D9, pd3dDevice); // for Direct3D 9
 	TwWindowSize(1200, 800);
-	TwBar *myBar;
+	
+		TwBar *myBar;
 	myBar = TwNewBar("Ocean Wave Settings");
 
-	TwAddVarRW(myBar, "sineParam[0]", TW_TYPE_FLOAT, &sineWaveParameters[0], " min=-25 max=25 step=0.02 group=WaveSource label='Emmiter X' ");
-	TwAddVarRW(myBar, "sineParam[1]", TW_TYPE_FLOAT, &sineWaveParameters[1], " min=-25 max=25 step=0.02 group=WaveSource label='Emmiter Z' ");
-	TwAddVarRW(myBar, "sineParam[2]", TW_TYPE_FLOAT, &sineWaveParameters[2], " min=-1.5 max=1.5 step=0.02 group=Characteristics label='Amplitude' ");
-	TwAddVarRW(myBar, "sineParam[3]", TW_TYPE_FLOAT, &sineWaveParameters[3], " min=0 max=100 step=0.05 group=Characteristics label='Period' ");
-	TwAddVarRW(myBar, "sineParam[4]", TW_TYPE_FLOAT, &sineWaveParameters[4], " min=-5 max=5 step=0.01 group=Characteristics label='Phase Shift' ");
-	TwAddVarRW(myBar, "sineParam[5]", TW_TYPE_FLOAT, &sineWaveParameters[5], " min=-360 max=360 step=0.1 group=Characteristics label='Phase Incr' ");
-	TwAddVarRW(myBar, "sineParam[6]", TW_TYPE_FLOAT, &sineWaveParameters[6], " min=-1.5 max=1.5 step=0.02 group=Characteristics label='Y Offset' ");
-	
 	TwAddButton(myBar, "Mode", wfButton, &wireframe, " label='Wireframe' ");
+
+	TwAddVarRW(myBar, "wave1emx", TW_TYPE_FLOAT, &wave[1].emX, " min=-25 max=25 step=0.02 group=Wave-1 label='Emmiter X' ");
+	TwAddVarRW(myBar, "wave1emz", TW_TYPE_FLOAT, &wave[1].emZ, " min=-25 max=25 step=0.02 group=Wave-1 label='Emmiter Z' ");
+	TwAddVarRW(myBar, "wave1amp",TW_TYPE_FLOAT, &wave[1].amp, " min=-3 max=3 step=0.02 group=Wave-1 label='Amplitude' ");
+	TwAddVarRW(myBar, "wave1prd", TW_TYPE_FLOAT, &wave[1].prd, " min=0 max=100 step=0.05 group=Wave-1 label='Period' ");
+	TwAddVarRW(myBar, "wave1phs", TW_TYPE_FLOAT, &wave[1].phS, " min=-5 max=5 step=0.01 group=Wave-1 label='Phase Shift' ");
+	TwAddVarRW(myBar, "wave1phi", TW_TYPE_FLOAT, &wave[1].phI, " min=-360 max=360 step=0.1 group=Wave-1 label='Phase Incr' ");
+	TwAddVarRW(myBar, "wave1yoff", TW_TYPE_FLOAT, &wave[1].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-1 label='Y Offset' ");
+
+	TwAddVarRW(myBar, "wave2emx", TW_TYPE_FLOAT, &wave[2].emX, " min=-25 max=25 step=0.02 group=Wave-2 label='Emmiter X' ");
+	TwAddVarRW(myBar, "wave2emz", TW_TYPE_FLOAT, &wave[2].emZ, " min=-25 max=25 step=0.02 group=Wave-2 label='Emmiter Z' ");
+	TwAddVarRW(myBar, "wave2amp", TW_TYPE_FLOAT, &wave[2].amp, " min=-3 max=3 step=0.02 group=Wave-2 label='Amplitude' ");
+	TwAddVarRW(myBar, "wave2prd", TW_TYPE_FLOAT, &wave[2].prd, " min=0 max=100 step=0.05 group=Wave-2 label='Period' ");
+	TwAddVarRW(myBar, "wave2phs", TW_TYPE_FLOAT, &wave[2].phS, " min=-5 max=5 step=0.01 group=Wave-2 label='Phase Shift' ");
+	TwAddVarRW(myBar, "wave2psi", TW_TYPE_FLOAT, &wave[2].phI, " min=-360 max=360 step=0.1 group=Wave-2 label='Phase Incr' ");
+	TwAddVarRW(myBar, "wave2yoff", TW_TYPE_FLOAT, &wave[2].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-2 label='Y Offset' ");
+
+	TwAddVarRW(myBar, "wave3emx", TW_TYPE_FLOAT, &wave[3].emX, " min=-25 max=25 step=0.02 group=Wave-3 label='Emmiter X' ");
+	TwAddVarRW(myBar, "wave3emz", TW_TYPE_FLOAT, &wave[3].emZ, " min=-25 max=25 step=0.02 group=Wave-3 label='Emmiter Z' ");
+	TwAddVarRW(myBar, "wave3amp", TW_TYPE_FLOAT, &wave[3].amp, " min=-3 max=3 step=0.02 group=Wave-3 label='Amplitude' ");
+	TwAddVarRW(myBar, "wave3prd", TW_TYPE_FLOAT, &wave[3].prd, " min=0 max=100 step=0.05 group=Wave-3 label='Period' ");
+	TwAddVarRW(myBar, "wave4phs", TW_TYPE_FLOAT, &wave[3].phS, " min=-5 max=5 step=0.01 group=Wave-3 label='Phase Shift' ");
+	TwAddVarRW(myBar, "wave4phi", TW_TYPE_FLOAT, &wave[3].phI, " min=-360 max=360 step=0.1 group=Wave-3 label='Phase Incr' ");
+	TwAddVarRW(myBar, "wave4yoff", TW_TYPE_FLOAT, &wave[3].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-3 label='Y Offset' ");
+
+	TwAddVarRW(myBar, "wave4emx", TW_TYPE_FLOAT, &wave[4].emX, " min=-25 max=25 step=0.02 group=Wave-4 label='Emmiter X' ");
+	TwAddVarRW(myBar, "wave4emz", TW_TYPE_FLOAT, &wave[4].emZ, " min=-25 max=25 step=0.02 group=Wave-4 label='Emmiter Z' ");
+	TwAddVarRW(myBar, "wave4amp", TW_TYPE_FLOAT, &wave[4].amp, " min=-3 max=3 step=0.02 group=Wave-4 label='Amplitude' ");
+	TwAddVarRW(myBar, "wave4prd", TW_TYPE_FLOAT, &wave[4].prd, " min=0 max=100 step=0.05 group=Wave-4 label='Period' ");
+	TwAddVarRW(myBar, "wave4phs", TW_TYPE_FLOAT, &wave[4].phS, " min=-5 max=5 step=0.01 group=Wave-4 label='Phase Shift' ");
+	TwAddVarRW(myBar, "wave4phi", TW_TYPE_FLOAT, &wave[4].phI, " min=-360 max=360 step=0.1 group=Wave-4 label='Phase Incr' ");
+	TwAddVarRW(myBar, "wave4yoff", TW_TYPE_FLOAT, &wave[4].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-4 label='Y Offset' ");
+
+	TwAddVarRW(myBar, "wave5emx", TW_TYPE_FLOAT, &wave[5].emX, " min=-25 max=25 step=0.02 group=Wave-5 label='Emmiter X' ");
+	TwAddVarRW(myBar, "wave5emz", TW_TYPE_FLOAT, &wave[5].emZ, " min=-25 max=25 step=0.02 group=Wave-5 label='Emmiter Z' ");
+	TwAddVarRW(myBar, "wave5amp", TW_TYPE_FLOAT, &wave[5].amp, " min=-3 max=3 step=0.02 group=Wave-5 label='Amplitude' ");
+	TwAddVarRW(myBar, "wave5prd", TW_TYPE_FLOAT, &wave[5].prd, " min=0 max=100 step=0.05 group=Wave-5 label='Period' ");
+	TwAddVarRW(myBar, "wave5phs", TW_TYPE_FLOAT, &wave[5].phS, " min=-5 max=5 step=0.01 group=Wave-5 label='Phase Shift' ");
+	TwAddVarRW(myBar, "wave5phi", TW_TYPE_FLOAT, &wave[5].phI, " min=-360 max=360 step=0.1 group=Wave-5 label='Phase Incr' ");
+	TwAddVarRW(myBar, "wave5yoff", TW_TYPE_FLOAT, &wave[5].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-5 label='Y Offset' ");
+
+	TwAddVarRW(myBar, "wave6emx", TW_TYPE_FLOAT, &wave[6].emX, " min=-25 max=25 step=0.02 group=Wave-6 label='Emmiter X' ");
+	TwAddVarRW(myBar, "wave6emz", TW_TYPE_FLOAT, &wave[6].emZ, " min=-25 max=25 step=0.02 group=Wave-6 label='Emmiter Z' ");
+	TwAddVarRW(myBar, "wave6amp", TW_TYPE_FLOAT, &wave[6].amp, " min=-3 max=3 step=0.02 group=Wave-6 label='Amplitude' ");
+	TwAddVarRW(myBar, "wave6prd", TW_TYPE_FLOAT, &wave[6].prd, " min=0 max=100 step=0.05 group=Wave-6 label='Period' ");
+	TwAddVarRW(myBar, "wave6phs", TW_TYPE_FLOAT, &wave[6].phS, " min=-5 max=5 step=0.01 group=Wave-6 label='Phase Shift' ");
+	TwAddVarRW(myBar, "wave6phi", TW_TYPE_FLOAT, &wave[6].phI, " min=-360 max=360 step=0.1 group=Wave-6 label='Phase Incr' ");
+	TwAddVarRW(myBar, "wave6yoff", TW_TYPE_FLOAT, &wave[6].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-6 label='Y Offset' ");
+
+	TwAddVarRW(myBar, "wave7emx", TW_TYPE_FLOAT, &wave[7].emX, " min=-25 max=25 step=0.02 group=Wave-7 label='Emmiter X' ");
+	TwAddVarRW(myBar, "wave7emz", TW_TYPE_FLOAT, &wave[7].emZ, " min=-25 max=25 step=0.02 group=Wave-7 label='Emmiter Z' ");
+	TwAddVarRW(myBar, "wave7amp", TW_TYPE_FLOAT, &wave[7].amp, " min=-3 max=3 step=0.02 group=Wave-7 label='Amplitude' ");
+	TwAddVarRW(myBar, "wave7prd", TW_TYPE_FLOAT, &wave[7].prd, " min=0 max=100 step=0.05 group=Wave-7 label='Period' ");
+	TwAddVarRW(myBar, "wave7phs", TW_TYPE_FLOAT, &wave[7].phS, " min=-5 max=5 step=0.01 group=Wave-7 label='Phase Shift' ");
+	TwAddVarRW(myBar, "wave7phi", TW_TYPE_FLOAT, &wave[7].phI, " min=-360 max=360 step=0.1 group=Wave-7 label='Phase Incr' ");
+	TwAddVarRW(myBar, "wave7yoff", TW_TYPE_FLOAT, &wave[7].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-7 label='Y Offset' ");
+
+	TwAddVarRW(myBar, "wave8emx", TW_TYPE_FLOAT, &wave[8].emX, " min=-25 max=25 step=0.02 group=Wave-8 label='Emmiter X' ");
+	TwAddVarRW(myBar, "wave8emz", TW_TYPE_FLOAT, &wave[8].emZ, " min=-25 max=25 step=0.02 group=Wave-8 label='Emmiter Z' ");
+	TwAddVarRW(myBar, "wave8amp", TW_TYPE_FLOAT, &wave[8].amp, " min=-3 max=3 step=0.02 group=Wave-8 label='Amplitude' ");
+	TwAddVarRW(myBar, "wave8prd", TW_TYPE_FLOAT, &wave[8].prd, " min=0 max=100 step=0.05 group=Wave-8 label='Period' ");
+	TwAddVarRW(myBar, "wave8phs", TW_TYPE_FLOAT, &wave[8].phS, " min=-5 max=5 step=0.01 group=Wave-8 label='Phase Shift' ");
+	TwAddVarRW(myBar, "wave8phi", TW_TYPE_FLOAT, &wave[8].phI, " min=-360 max=360 step=0.1 group=Wave-8 label='Phase Incr' ");
+	TwAddVarRW(myBar, "wave8yoff", TW_TYPE_FLOAT, &wave[8].Yoff, " min=-1.5 max=1.5 step=0.02 group=Wave-8 label='Y Offset' ");
+	
+	
 
 
 	return true;
@@ -858,41 +918,40 @@ These are:
 5: yOffset
 
 */
-bool rtvsD3dApp::meshUpdateY (float* sineParam, float step)
+bool rtvsD3dApp::meshUpdateY (float step)
 
 {
-    // wave
-    float emitterX   = sineParam[0];
-    float emitterZ   = sineParam[1];
-    float amplitude  = sineParam[2];
-    float period     = sineParam[3];
-    float phaseShift = sineParam[4];
-    float phaseIncr  = sineParam[5];
-    float yOffset    = sineParam[6];
 
     // ---- lock vertex buffer ----
     meshVertex*    pVertexData;
     HRESULT hr = pMesh->LockVertexBuffer(0, (void**) &pVertexData);
 
     // for each vertex
-	int xVertexCount = 100;
+	int rowVerts = 100; //vertices per row
 
     for (DWORD v=0; v<vertices; v++)
     {
+		pVertexData->y = 0;
+		int enable = 0;
+		for (int i = 0; i < 9; i++) {
+			if(waveEnabled[i]){
+				// wave
+				float xd = pVertexData->x - wave[i].emX;
+				float zd = pVertexData->z - wave[i].emZ;
+				float d  = sqrt(xd*xd+zd*zd);
+				pVertexData->y += wave[i].amp * sin( (wave[i].prd*d - step*wave[i].phS) * float(0.01745329252) ) + wave[i].Yoff;
+				enable++;
+			}
+		}
+		pVertexData->y /= enable;
 
-        // wave
-        float xd = pVertexData->x - emitterX;
-        float zd = pVertexData->z - emitterZ;
-        float d  = sqrt(xd*xd+zd*zd);
-        pVertexData->y = amplitude * sin( (period*d - step*phaseShift) * float(0.01745329252) ) + yOffset;
-
-		//normals
-		if (v%xVertexCount==xVertexCount-1){
-			meshNormal(pVertexData-1, pVertexData+(xVertexCount+1), pVertexData+xVertexCount, pVertexData);
+		//normal calculation
+		if (v%rowVerts==rowVerts-1){
+			meshNormal(pVertexData-1, pVertexData+(rowVerts-+1), pVertexData+rowVerts, pVertexData);
 		} else if (v>=vertices-vtxRows){
-			meshNormal(pVertexData-1, pVertexData-(xVertexCount+1), pVertexData-xVertexCount, pVertexData);
+			meshNormal(pVertexData-1, pVertexData-(rowVerts-+1), pVertexData-rowVerts, pVertexData);
 		} else {
-			meshNormal(pVertexData+1, pVertexData+(xVertexCount+1), pVertexData+xVertexCount, pVertexData);
+			meshNormal(pVertexData+1, pVertexData+(rowVerts+1), pVertexData+rowVerts, pVertexData);
 		}
 
         // next
@@ -1001,6 +1060,8 @@ bool rtvsD3dApp::updateKeyboard ()
 		currentKeyClicked = 7;
 	else if(GetAsyncKeyState('8') & 0x8000f)
 		currentKeyClicked = 8;
+	else if(GetAsyncKeyState('9') & 0x8000f)
+		currentKeyClicked = 9;
 
 	// ok
 	return true;

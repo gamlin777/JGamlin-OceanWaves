@@ -152,12 +152,34 @@ public:
 	void setSpin	(float, float);
 
 	bool plane (LPDIRECT3DDEVICE9, int,	int, float*);   // mesh parameters
-	bool meshUpdateY (float*, float);
+	bool meshUpdateY (float);
 	void meshNormal (meshVertex*, meshVertex*, meshVertex*, meshVertex*);
 
 	float sineWaveParameters[7];
+
 	float frame;
 	bool wireframe;
+
+	
+
+		struct waveFile {
+				int   id;
+				float emX;
+				float emZ;
+				float amp;
+				float prd;
+				float phS;
+				float phI;
+				float Yoff;
+			};
+
+		waveFile wave[9];
+
+		bool waveEnabled[9];
+
+
+	
+
 };
 
 
